@@ -5,12 +5,14 @@ import { Генерация } from './Генерация';
 
 export const Rout = () =>{
     let [text, setText] = useState("")
+    let [tabl, settabl] = useState({Буффер: [],НомерСтраницы:[],Ft: []})
     let t = ""
     const {loading, request, error, clearError}= useHttp()
     const[form, setForm] = useState({
       Название: "", 
       РазмерБуффера: 0, 
       КоличествоЭлементов: 0, 
+      КоличествоСтраниц: 0,
       РабочееМножество: 0, 
       СбросОбращения: 0,
       Содержимое: []
@@ -29,7 +31,7 @@ export const Rout = () =>{
 
       const ОтправитьФорму = async () => {
         try{
-          form.Содержимое = Генерация(form.РазмерБуффера,form.КоличествоЭлементов,form.СбросОбращения)
+          form.Содержимое = Генерация(form.КоличествоСтраниц,form.КоличествоЭлементов,form.СбросОбращения)
           Пичать(form)
           const data = await request("/api/start/Add", "POST", {...form})
             if (window.M && data.message) {
@@ -38,7 +40,7 @@ export const Rout = () =>{
 
         } catch (e) {}
       }
-      const Пичать = (data) =>{
+      const Пичать = (data, fifo = null) =>{
         t = ""
         t += "Название: "
         t += data.Название
@@ -46,6 +48,8 @@ export const Rout = () =>{
         t += data.РазмерБуффера
         t += "\nКоличество элементов: "
         t += data.КоличествоЭлементов
+        t += "\nКоличество страниц: "
+        t += data.КоличествоСтраниц
         t += "\nРабочее множество: "
         t += data.РабочееМножество
         t += "\nСброс обращения: "
@@ -59,8 +63,7 @@ export const Rout = () =>{
           t += " Запись: "
           t += data.Содержимое[index].Запись
         }
-        t += "\n]"
-                    
+        t += "\n]\n"
         setText(t) 
       }
       const СчитатьДанных = async () => {
@@ -69,7 +72,11 @@ export const Rout = () =>{
             if (window.M && data.message) {
                 window.M.toast({html: data.message})
             }
-            Пичать(data.source)
+            data.fifo = await JSON.parse(data.fifo)
+            Пичать(data.source,data.fifo)
+            console.log(data.fifo)
+            settabl({Буффер: [],НомерСтраницы:[],Ft: []})
+            settabl(data.fifo)
         } catch (e) {console.log(e)}
       }
 
@@ -97,12 +104,16 @@ export const Rout = () =>{
         } catch (e) {}
       }
 
-      
+    
+
+    
+
     return(
-        <div className = "row">
+        <div>
             <Route path = "/" exact>
-                <div className = "col s6 offset-s3" >
-                    <h1>Здарова</h1>
+                    <div className="container">
+                    <div className = "row">
+                    <div className = "col s6 offset-s3" >
                     <div className="card blue-grey darken-1">
                         <div className="card-content white-text">
                             <span className="card-title">Что мне сделать?</span>
@@ -138,6 +149,13 @@ export const Rout = () =>{
                                 className="validate" 
                                 onChange={ОбновитьФорму}/>
 
+                                <input placeholder="Количество страниц" 
+                                id="КоличествоСтраниц" 
+                                name="КоличествоСтраниц" 
+                                type="Number" 
+                                className="validate" 
+                                onChange={ОбновитьФорму}/>
+
                                 <input placeholder="Рабочее множество" 
                                 id="РабочееМножество" 
                                 name="РабочееМножество" 
@@ -167,8 +185,37 @@ export const Rout = () =>{
 
                         </div>
                     </div>
+                    </div>
+                    <div className="container">
                     <pre>{text}</pre>
-                </div>
+                    </div>
+                    </div>
+                    </div>
+
+                     
+                    <table className="responsive-table highlight">
+                      <thead>
+                        <tr>
+                            <th>N:</th>
+                            {tabl.Буффер.map((Буффер) => (
+                                    <th>{Буффер[0]}</th>
+                                ))}
+                            <th>PF:</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      {tabl.НомерСтраницы.map((НомерСтраницы, index) => (
+                        <tr>
+                          <td>{НомерСтраницы}</td>
+                          {tabl.Буффер.map((Буффер) => (
+                              <td>{ Буффер[index+1] !=-1 ? Буффер[index+1] : "!"} </td> ))}
+
+                          <td>{tabl.Pf[index]}</td>
+                        </tr>))}
+
+                      </tbody>
+                    </table>
+                    
             </Route>
             <Redirect to ="/"/>
         </div>

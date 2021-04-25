@@ -9,9 +9,7 @@ function App() {
   const html = Rout()
   return (
     <BrowserRouter>
-      <div className="container">
         {html}
-      </div>
     </BrowserRouter>
   )
 }

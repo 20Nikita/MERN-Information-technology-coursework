@@ -1,5 +1,6 @@
 const {Router} = require('express')
 const {Schema, model} = require('mongoose')
+const  algoritm  = require('./fifo')
 
 const stringSchema = new Schema({
     НомерСтраницы: {type: Number, required: true},
@@ -11,10 +12,12 @@ const ШаблонДанных = new Schema({
     Название: {type: String, required: true, unique: true},
     РазмерБуффера: {type: Number, required: true},
     КоличествоЭлементов: {type: Number, required: true},
+    КоличествоСтраниц: {type: Number, required: true},
     РабочееМножество: {type: Number, required: true},
     СбросОбращения: {type: Number, required: true},
     Содержимое: [stringSchema]
 })
+
 
 const БазаДанных = Router()
 var Данные = model('Данные', ШаблонДанных);
@@ -24,7 +27,8 @@ var Данные = model('Данные', ШаблонДанных);
     "/Add",
     async(req, res) => {
         try {
-            const {Название, РазмерБуффера, КоличествоЭлементов, РабочееМножество, СбросОбращения, Содержимое} = req.body
+            const {Название, РазмерБуффера, КоличествоЭлементов,КоличествоСтраниц, РабочееМножество, СбросОбращения, Содержимое} = req.body
+            
             const candidate = await Данные.findOne({ Название: Название })
         if(candidate){
             return res.status(400).json({ message: 'Такое название существует! Придумайте другое или переименйте загружаемый файл' })
@@ -32,11 +36,14 @@ var Данные = model('Данные', ШаблонДанных);
         const данные = new Данные({ Название:Название,
                                     РазмерБуффера:РазмерБуффера,
                                     КоличествоЭлементов:КоличествоЭлементов,
+                                    КоличествоСтраниц:КоличествоСтраниц,
                                     РабочееМножество:РабочееМножество,
                                     СбросОбращения:СбросОбращения,
                                     Содержимое:Содержимое})
         await данные.save()
-        res.status(201).json({ message: 'Данные сохранены' })
+        let масив = algoritm.fifo(РазмерБуффера,Содержимое)
+        масив = JSON.stringify(масив)
+        res.status(201).json({ message: 'Данные сохранены', fifo: масив })
         } catch (e) {
             console.log(e)
             res.status(500).json({message: {message: 'Что-то пошло не так, попробуйте снова'}})
@@ -49,14 +56,16 @@ var Данные = model('Данные', ШаблонДанных);
     "/getOne",
     async(req, res) => {
         try {
-            const {Название, РазмерБуффера, РабочееМножество, СбросОбращения, Содержимое} = req.body
+            const {Название} = req.body
             const candidate = await Данные.findOne({ Название: Название })
         if(!candidate){
             return res.status(400).json({ message: 'Такого набора данных не существует' })
         }
-        candidate.Содержимое.sort((a, b) => a.ВремяОбращения - b.ВремяОбращения)
-        res.status(201).json({ message: 'Данные найдены', source: candidate })
+        let масив = algoritm.fifo(candidate.РазмерБуффера,candidate.Содержимое)
+            масив = JSON.stringify(масив)
+            res.status(201).json({ message: 'Данные найдены', source: candidate, fifo: масив })
         } catch (e) {
+            console.log(e)
             res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
         }
     }
