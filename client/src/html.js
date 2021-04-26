@@ -5,7 +5,9 @@ import { Генерация } from './Генерация';
 
 export const Rout = () =>{
     let [text, setText] = useState("")
-    let [tabl, settabl] = useState({Буффер: [],НомерСтраницы:[],Ft: []})
+    let [fifo, setfifo] = useState({Буффер: [],НомерСтраницы:[],Pf: []})
+    let [WS_Clock, setWS_Clock] = useState({ИзмененноеВремяОбращения: [],
+       ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
     let t = ""
     const {loading, request, error, clearError}= useHttp()
     const[form, setForm] = useState({
@@ -34,13 +36,18 @@ export const Rout = () =>{
           form.Содержимое = Генерация(form.КоличествоСтраниц,form.КоличествоЭлементов,form.СбросОбращения)
           Пичать(form)
           const data = await request("/api/start/Add", "POST", {...form})
-            if (window.M && data.message) {
-                window.M.toast({html: data.message})
-            }
-
+          if (window.M && data.message) {
+            window.M.toast({html: data.message})
+          }
+          data.fifo = await JSON.parse(data.fifo)
+          data.WS_Clock = await JSON.parse(data.WS_Clock)
+          setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
+          setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
+          setfifo(data.fifo)
+          setWS_Clock(data.WS_Clock)
         } catch (e) {}
       }
-      const Пичать = (data, fifo = null) =>{
+      const Пичать = (data) =>{
         t = ""
         t += "Название: "
         t += data.Название
@@ -63,7 +70,7 @@ export const Rout = () =>{
           t += " Запись: "
           t += data.Содержимое[index].Запись
         }
-        t += "\n]\n"
+        t += "\n]"
         setText(t) 
       }
       const СчитатьДанных = async () => {
@@ -73,10 +80,13 @@ export const Rout = () =>{
                 window.M.toast({html: data.message})
             }
             data.fifo = await JSON.parse(data.fifo)
-            Пичать(data.source,data.fifo)
-            console.log(data.fifo)
-            settabl({Буффер: [],НомерСтраницы:[],Ft: []})
-            settabl(data.fifo)
+            data.WS_Clock = await JSON.parse(data.WS_Clock)
+            console.log(data.WS_Clock)
+            Пичать(data.source)
+            setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
+            setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
+            setfifo(data.fifo)
+            setWS_Clock(data.WS_Clock)
         } catch (e) {console.log(e)}
       }
 
@@ -103,10 +113,6 @@ export const Rout = () =>{
             }
         } catch (e) {}
       }
-
-    
-
-    
 
     return(
         <div>
@@ -191,28 +197,65 @@ export const Rout = () =>{
                     </div>
                     </div>
                     </div>
-
-                     
-                    <table className="responsive-table highlight">
+                    <h2>fifo</h2>
+                    <table className="responsive-table">
                       <thead>
                         <tr>
                             <th>N:</th>
-                            {tabl.Буффер.map((Буффер) => (
+                            {fifo.Буффер.map((Буффер) => (
                                     <th>{Буффер[0]}</th>
                                 ))}
                             <th>PF:</th>
                         </tr>
                       </thead>
                       <tbody>
-                      {tabl.НомерСтраницы.map((НомерСтраницы, index) => (
+                      {fifo.НомерСтраницы.map((НомерСтраницы, index) => (
                         <tr>
                           <td>{НомерСтраницы}</td>
-                          {tabl.Буффер.map((Буффер) => (
+                          {fifo.Буффер.map((Буффер) => (
                               <td>{ Буффер[index+1] !=-1 ? Буффер[index+1] : "!"} </td> ))}
 
-                          <td>{tabl.Pf[index]}</td>
+                          <td>{fifo.Pf[index]}</td>
                         </tr>))}
+                      </tbody>
+                    </table>
 
+                    <h2>WS_Clock</h2>
+
+                    <table className="responsive-table">
+                      <thead>
+                        <tr>
+                        <th>ИВО:</th>
+                        <th>ВО:</th>
+                            <th>ОП:</th>
+                            {WS_Clock.Буффер.map((t,i) => (
+                              <th>
+                              <th>{i}</th>
+                              <th>БО</th>
+                              <th>БИ</th>
+                              <th>ВПИ</th>
+                              </th>
+                            ))}
+                            <th>PF:</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      {WS_Clock.НомерСтраницы.map((НомерСтраницы, index) => (
+                        <tr>
+                          <td>{WS_Clock.ИзмененноеВремяОбращения[index]}</td>
+                          <td>{WS_Clock.ВремяОбращения[index]}</td>
+                          <td>{НомерСтраницы}</td>
+                          
+                          {WS_Clock.Буффер.map((Буффер) => (
+                            <td>
+                              <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.ТекущаяСтраница[index] : "!"} </td>
+                              <td>{ Буффер.БитОбращения[index] !=-1 ? Буффер.БитОбращения[index] : "!"} </td>
+                              <td>{ Буффер.БитИзменения[index] !=-1 ? Буффер.БитИзменения[index] : "!"} </td>
+                              <td>{ Буффер.ВремяПоследнегоИзменения[index] !=-1 ? Буффер.ВремяПоследнегоИзменения[index] : "!"} </td>
+                              </td>))}
+
+                          <td>{WS_Clock.Pf[index]}</td>
+                        </tr>))}
                       </tbody>
                     </table>
                     

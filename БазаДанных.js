@@ -1,6 +1,6 @@
 const {Router} = require('express')
 const {Schema, model} = require('mongoose')
-const  algoritm  = require('./fifo')
+const  algoritm  = require('./algs')
 
 const stringSchema = new Schema({
     НомерСтраницы: {type: Number, required: true},
@@ -41,9 +41,10 @@ var Данные = model('Данные', ШаблонДанных);
                                     СбросОбращения:СбросОбращения,
                                     Содержимое:Содержимое})
         await данные.save()
-        let масив = algoritm.fifo(РазмерБуффера,Содержимое)
-        масив = JSON.stringify(масив)
-        res.status(201).json({ message: 'Данные сохранены', fifo: масив })
+        let fifo = JSON.stringify(algoritm.fifo(РазмерБуффера,Содержимое))
+        let WS_Clock = JSON.stringify(algoritm.WS_Clock(РазмерБуффера, КоличествоЭлементов,
+            КоличествоСтраниц, РабочееМножество, СбросОбращения, Содержимое))
+        res.status(201).json({ message: 'Данные сохранены', fifo: fifo, WS_Clock: WS_Clock })
         } catch (e) {
             console.log(e)
             res.status(500).json({message: {message: 'Что-то пошло не так, попробуйте снова'}})
@@ -61,9 +62,10 @@ var Данные = model('Данные', ШаблонДанных);
         if(!candidate){
             return res.status(400).json({ message: 'Такого набора данных не существует' })
         }
-        let масив = algoritm.fifo(candidate.РазмерБуффера,candidate.Содержимое)
-            масив = JSON.stringify(масив)
-            res.status(201).json({ message: 'Данные найдены', source: candidate, fifo: масив })
+        let fifo = JSON.stringify(algoritm.fifo(candidate.РазмерБуффера,candidate.Содержимое))
+        let WS_Clock = JSON.stringify(algoritm.WS_Clock(candidate.РазмерБуффера,candidate.КоличествоЭлементов,
+            candidate.КоличествоСтраниц, candidate.РабочееМножество,candidate.СбросОбращения,candidate.Содержимое))
+            res.status(201).json({ message: 'Данные найдены', source: candidate, fifo: fifo, WS_Clock: WS_Clock })
         } catch (e) {
             console.log(e)
             res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
