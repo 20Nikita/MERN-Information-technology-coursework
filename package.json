@@ -12,6 +12,7 @@
   "author": "Никита Гордеев <gordeev.2017@bk.ru>",
   "license": "ISC",
   "dependencies": {
+    "bootstrap": "^4.6.0",
     "config": "^3.3.6",
     "express": "^4.17.1",
     "mongoose": "^5.12.5"

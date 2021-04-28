@@ -2,265 +2,380 @@ import {Redirect, Route} from "react-router-dom"
 import React, {useEffect, useState} from 'react';
 import { useHttp } from './hooks/http.hooks';
 import { Генерация } from './Генерация';
+import materialize from "materialize-css";
+
 
 export const Rout = () =>{
-    let [text, setText] = useState("")
-    let [fifo, setfifo] = useState({Буффер: [],НомерСтраницы:[],Pf: []})
-    let [WS_Clock, setWS_Clock] = useState({ИзмененноеВремяОбращения: [],
-       ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
-    let t = ""
-    const {loading, request, error, clearError}= useHttp()
-    const[form, setForm] = useState({
-      Название: "", 
-      РазмерБуффера: 0, 
-      КоличествоЭлементов: 0, 
-      КоличествоСтраниц: 0,
-      РабочееМножество: 0, 
-      СбросОбращения: 0,
-      Содержимое: []
-    })
-    useEffect( () => {
-        clearError()
-        if (window.M && error) {
-            window.M.toast({html: error})
-            setText(error) 
-        }
+  let [text, setText] = useState("")
+  let [fifo, setfifo] = useState({Буффер: [],НомерСтраницы:[],Pf: []})
+  let [WS_Clock, setWS_Clock] = useState({ИзмененноеВремяОбращения: [],
+      ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
+  let t = ""
+
+  const {loading, request, error, clearError}= useHttp()
+  const[form, setForm] = useState({
+    Название: "", 
+    РазмерБуффера: 0, 
+    КоличествоЭлементов: 0, 
+    КоличествоСтраниц: 0,
+    РабочееМножество: 0, 
+    СбросОбращения: 0,
+    Содержимое: []
+  })
+  useEffect( () => {
+      clearError()
+      if (window.M && error) {
+        window.M.toast({html: error})
+      }
+      if (error) {setText(error) }
     }, [error,clearError])
 
-    const ОбновитьФорму = event =>{
-        setForm({ ...form, [event.target.name]: event.target.value})        
+  const ОбновитьФорму = event =>{
+    setForm({ ...form, [event.target.name]: event.target.value})        
+  }
+  
+  const ClearForm = event =>{
+    document.getElementById("Название").value = ""
+    document.getElementById("РазмерБуффера").value = ""
+    document.getElementById("КоличествоЭлементов").value = ""
+    document.getElementById("КоличествоСтраниц").value = ""
+    document.getElementById("РабочееМножество").value = ""
+    document.getElementById("СбросОбращения").value = ""
+  }
+  let [КогоЗагрузить, setКогоЗагрузить] = useState(null)
+  const ОбновитьSelect = event =>{
+    setКогоЗагрузить(event.target.value)
+    if(event.target.value !== "0"){
+      console.log(event.target.value)
+      document.getElementById("Название").value = СохранДанные[event.target.value-1].Название
+      document.getElementById("РазмерБуффера").value = СохранДанные[event.target.value-1].РазмерБуффера
+      document.getElementById("КоличествоЭлементов").value = СохранДанные[event.target.value-1].КоличествоЭлементов
+      document.getElementById("КоличествоСтраниц").value = СохранДанные[event.target.value-1].КоличествоСтраниц
+      document.getElementById("РабочееМножество").value = СохранДанные[event.target.value-1].РабочееМножество
+      document.getElementById("СбросОбращения").value = СохранДанные[event.target.value-1].СбросОбращения
+    }
+  }
+  let [СохранДанные, setСохранДанные] = useState([])
+  useEffect( () => {
+    var elems = document.querySelector('select');
+    elems.length = 2
+    materialize.FormSelect.init(elems, materialize.options);
+    for (let index = 0; index < СохранДанные.length; index++) {
+      var elems = document.querySelector('select');
+      elems.add(new Option(`${СохранДанные[index].Название}`,`${index+1}`))
+      materialize.FormSelect.init(elems, materialize.options);
+    }
+  }, [СохранДанные])
+  const ЧтениеДанных = async () => {
+    try{
+      const data = await request("/api/start/Get", "get")
+      if (window.M && data.message) {
+          window.M.toast({html: data.message})
       }
+      setСохранДанные(data.exists)
+    } catch (e) {}
+  }
+  let [Загрузить, setЗагрузить] = useState(true)
+  if(Загрузить){
+    ЧтениеДанных()
+    setЗагрузить(!Загрузить)
+  }
 
-      const ОтправитьФорму = async () => {
-        try{
-          form.Содержимое = Генерация(form.КоличествоСтраниц,form.КоличествоЭлементов,form.СбросОбращения)
-          Пичать(form)
-          const data = await request("/api/start/Add", "POST", {...form})
-          if (window.M && data.message) {
+  const ОтправитьФорму = async () => {
+    try{
+      form.Содержимое = Генерация(form.КоличествоСтраниц,form.КоличествоЭлементов,form.СбросОбращения)
+      const data = await request("/api/start/Add", "POST", {...form})
+      if (window.M && data.message) {
+        window.M.toast({html: data.message})
+      }
+      setЗагрузить(!Загрузить)
+      data.fifo = await JSON.parse(data.fifo)
+      data.WS_Clock = await JSON.parse(data.WS_Clock)
+      Пичать(form)
+      setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
+      setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
+      setfifo(data.fifo)
+      setWS_Clock(data.WS_Clock)
+    } catch (e) {}
+  }
+  const Пичать = (data) =>{
+    t = ""
+    t += "Название: "
+    t += data.Название
+    t += "\nРазмер буффера: "
+    t += data.РазмерБуффера
+    t += "\nКоличество элементов: "
+    t += data.КоличествоЭлементов
+    t += "\nКоличество страниц: "
+    t += data.КоличествоСтраниц
+    t += "\nРабочее множество: "
+    t += data.РабочееМножество
+    t += "\nСброс обращения: "
+    t += data.СбросОбращения
+    t += "\nСодержимое: ["
+    for (let index = 0; index < data.Содержимое.length; index++) {
+      t += "\nНомер cтраницы: "
+      t += data.Содержимое[index].НомерСтраницы
+      t += " Время обращения: "
+      t += data.Содержимое[index].ВремяОбращения
+      t += " Запись: "
+      t += data.Содержимое[index].Запись
+    }
+    t += "\n]"
+    setText(t) 
+  }
+  const СчитатьДанные = async () => {
+    try{
+      if(СохранДанные[КогоЗагрузить-1]){
+        const data = await request("/api/start/getOne", "POST", СохранДанные[КогоЗагрузить-1])
+        if (window.M && data.message) {
             window.M.toast({html: data.message})
-          }
-          data.fifo = await JSON.parse(data.fifo)
-          data.WS_Clock = await JSON.parse(data.WS_Clock)
-          setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
-          setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
-          setfifo(data.fifo)
-          setWS_Clock(data.WS_Clock)
-        } catch (e) {}
-      }
-      const Пичать = (data) =>{
-        t = ""
-        t += "Название: "
-        t += data.Название
-        t += "\nРазмер буффера: "
-        t += data.РазмерБуффера
-        t += "\nКоличество элементов: "
-        t += data.КоличествоЭлементов
-        t += "\nКоличество страниц: "
-        t += data.КоличествоСтраниц
-        t += "\nРабочее множество: "
-        t += data.РабочееМножество
-        t += "\nСброс обращения: "
-        t += data.СбросОбращения
-        t += "\nСодержимое: ["
-        for (let index = 0; index < data.Содержимое.length; index++) {
-          t += "\nНомер cтраницы: "
-          t += data.Содержимое[index].НомерСтраницы
-          t += " Время обращения: "
-          t += data.Содержимое[index].ВремяОбращения
-          t += " Запись: "
-          t += data.Содержимое[index].Запись
         }
-        t += "\n]"
-        setText(t) 
+        data.fifo = await JSON.parse(data.fifo)
+        data.WS_Clock = await JSON.parse(data.WS_Clock)
+        Пичать(data.source)
+        setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
+        setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
+        setfifo(data.fifo) 
+        setЗагрузить(!Загрузить)
+        setWS_Clock(data.WS_Clock)
       }
-      const СчитатьДанных = async () => {
-        try{
-          const data = await request("/api/start/getOne", "POST", {...form})
-            if (window.M && data.message) {
-                window.M.toast({html: data.message})
-            }
-            data.fifo = await JSON.parse(data.fifo)
-            data.WS_Clock = await JSON.parse(data.WS_Clock)
-            console.log(data.WS_Clock)
-            Пичать(data.source)
-            setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
-            setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
-            setfifo(data.fifo)
-            setWS_Clock(data.WS_Clock)
-        } catch (e) {console.log(e)}
-      }
+    } catch (e) {console.log(e)}
+  }
 
-      const ЧтениеДанных = async () => {
-        try{
-          const data = await request("/api/start/Get", "get")
-            if (window.M && data.message) {
-                window.M.toast({html: data.message})
-            }
-        t = ""
-        for (let index = 0; index < data.exists.length; index++) {
-            t += data.exists[index].Название
-            t +="\n"
+  
+  
+  const УдалениеДанных = async () => {
+    try{
+      if(СохранДанные[КогоЗагрузить-1]){
+        console.log(СохранДанные[КогоЗагрузить-1])
+        const data = await request("/api/start/Delete", "delete", СохранДанные[КогоЗагрузить-1])
+        if (window.M && data.message) {
+            window.M.toast({html: data.message})
         }
-        setText(t) 
-        } catch (e) {}
+        t =  data.message
+        setText(t)
+        setЗагрузить(!Загрузить)
+        if (data.message)
+          setText(data.message)
       }
-
-      const УдалениеДанных = async () => {
-        try{
-          const data = await request("/api/start/Delete", "delete", {...form})
-            if (window.M && data.message) {
-                window.M.toast({html: data.message})
-            }
-        } catch (e) {}
-      }
-
-    return(
-        <div>
-            <Route path = "/" exact>
-                    <div className="container">
-                    <div className = "row">
-                    <div className = "col s6 offset-s3" >
-                    <div className="card blue-grey darken-1">
-                        <div className="card-content white-text">
-                            <span className="card-title">Что мне сделать?</span>
-                            <div>
-
-                                <div className="input-field">
-                                <input placeholder="Название"
-                                id="Название" 
-                                name="Название" 
-                                type="text" 
-                                className="validate" 
-                                onChange={ОбновитьФорму}/>
-            
-                                <button className="waves-effect waves-light btn" style={{marginRight: 10}}
-                                onClick = {СчитатьДанных}
-                                >считать данные</button>
-
-                                <button className="waves-effect waves-light btn" style={{marginRight: 10}}
-                                onClick = {УдалениеДанных}
-                                >Удалить данные</button>
-
-                                <input placeholder="Размер буффера" 
-                                id="РазмерБуффера" 
-                                name="РазмерБуффера" 
-                                type="Number" 
-                                className="validate" 
-                                onChange={ОбновитьФорму}/>
-
-                                <input placeholder="Количество элементов" 
-                                id="КоличествоЭлементов" 
-                                name="КоличествоЭлементов" 
-                                type="Number" 
-                                className="validate" 
-                                onChange={ОбновитьФорму}/>
-
-                                <input placeholder="Количество страниц" 
-                                id="КоличествоСтраниц" 
-                                name="КоличествоСтраниц" 
-                                type="Number" 
-                                className="validate" 
-                                onChange={ОбновитьФорму}/>
-
-                                <input placeholder="Рабочее множество" 
-                                id="РабочееМножество" 
-                                name="РабочееМножество" 
-                                type="Number" 
-                                className="validate" 
-                                onChange={ОбновитьФорму}/>
-
-                                <input placeholder="Время сброса обращения" 
-                                id="СбросОбращения" 
-                                name="СбросОбращения" 
-                                type="Number" 
-                                className="validate" 
-                                onChange={ОбновитьФорму}/>
-                                </div>
+    } catch (e) {}
+    
+  }
+      
+  
+  return(
+    <div>
+      <Route path = "/" exact>
+        <div className = "vertical">
+          <div className = "item">
+            <div className = "horizontal">
+              <div className = "item zag3 zag4">
+                <div className = "centr catr">
+                  <div className="card blue-grey darken-1">
+                    <div className="card-content white-text">
+                      <span className="card-title cen zag1">Загрузить данные</span>
+                        <div style={{height: 5}}></div>
+                        <div className=" horizontal input-field">
+                          <div className="item">
+                            <div className="btn zag4 notBor t">
+                            <select onChange={ОбновитьSelect} class="materialSelect" id="myDropdown">
+                                <option disabled selected name="Название">ОТКУДА?</option>
+                                <optgroup label="с файла">
+                                  <option value="0">С файла</option>
+                                </optgroup>
+                                <optgroup label="с сервера">
+                                </optgroup>
+                              </select>
                             </div>
-                        </div>
-                        <div className="card-action">
-
-                            <button className="waves-effect waves-light btn" style={{marginRight: 10}}
-                            onClick = {ОтправитьФорму}
+                          </div>
+                          <div style={{width: 10}}></div>
+                            <button className="waves-effect waves-light btn item zag4" 
+                            onClick = {СчитатьДанные}
                             disabled = {loading}
-                            >Сгенерировать данные</button>
-                            
-                            <button className="waves-effect waves-light btn" style={{marginRight: 10}}
-                            onClick = {ЧтениеДанных}
-                            >прочитать данные</button>
+                            >Загрузить</button>
+                      </div>
+                      <div style={{height: 30}}></div>
+                      <span className="card-title cen zag2">Сгенерировать новые</span>
+                      <div style={{height: 5}}></div>
+                      <div>
+                        <div className="input-field">
+                          <div className = "horizontal">
+                            <p className = "cen "
+                            style={{width: 200}}
+                            >Название</p>
 
+                            <input placeholder="Должно быть уникальным"
+                            style={{height: 30 }}
+                            id="Название" 
+                            name="Название" 
+                            type="text" 
+                            className="validate cen" 
+                            onChange={ОбновитьФорму}/>
+                          <div style={{width: 20}}></div>
+                          <button className="waves-effect waves-light btn zag4 ing"
+                          onClick = {ClearForm}></button>
+                      
+                          </div>
+
+                          <div className = "horizontal">
+                            <p className = "cen"
+                            style={{width: 350}}
+                            >Размер буффера</p>
+
+                            <input placeholder=" > 0" 
+                            id="РазмерБуффера" 
+                            name="РазмерБуффера" 
+                            type="Number" 
+                            className="validate rig" 
+                            onChange={ОбновитьФорму}/>
+                          </div>
+
+                          <div className = "horizontal">
+                            <p className = "cen"
+                            style={{width: 350}}
+                            >Количество элементов</p>
+
+                            <input placeholder=" > 0 " 
+                            id="КоличествоЭлементов" 
+                            name="КоличествоЭлементов" 
+                            type="Number" 
+                            className="validate rig" 
+                            onChange={ОбновитьФорму}/>
+                          </div>
+
+                          <div className = "horizontal">
+                            <p className = "cen"
+                            style={{width: 350}}
+                            >Количество страниц</p>
+
+                            <input placeholder=" > 0 "
+                            id="КоличествоСтраниц" 
+                            name="КоличествоСтраниц" 
+                            type="Number" 
+                            className="validate rig" 
+                            onChange={ОбновитьФорму}/>
+                          </div>
+
+                          <div className = "horizontal">
+                            <p className = "cen"
+                            style={{width: 350}}
+                            >Рабочее множество</p>
+
+                            <input placeholder=" > 0 " 
+                            id="РабочееМножество" 
+                            name="РабочееМножество" 
+                            type="Number" 
+                            className="validate rig" 
+                            onChange={ОбновитьФорму}/>
+                          </div>
+
+                          <div className = "horizontal">
+                              <p className = "cen"
+                              style={{width: 350}}
+                              >Время сброса обращения</p>
+
+                              <input placeholder=" > 2 " 
+                              id="СбросОбращения" 
+                              name="СбросОбращения" 
+                              type="Number" 
+                              className="validate rig" 
+                              onChange={ОбновитьФорму}/>
+                          </div>
                         </div>
+                      </div>
                     </div>
-                    </div>
-                    <div className="container">
-                    <pre>{text}</pre>
-                    </div>
-                    </div>
-                    </div>
-                    <h2>fifo</h2>
-                    <table className="responsive-table">
-                      <thead>
-                        <tr>
-                            <th>N:</th>
-                            {fifo.Буффер.map((Буффер) => (
-                                    <th>{Буффер[0]}</th>
-                                ))}
-                            <th>PF:</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                      {fifo.НомерСтраницы.map((НомерСтраницы, index) => (
-                        <tr>
-                          <td>{НомерСтраницы}</td>
+
+                    <div className=" horizontal card-action">
+                          <button className="waves-effect waves-light btn item zag4" 
+                          style={{}}
+                          onClick = {ОтправитьФорму}
+                          disabled = {loading}
+                          >Сгенерировать</button>
+                          <div style={{width: 10}}></div>
+                          <button className="waves-effect waves-light btn item zag4" 
+                          style={{}}
+                          onClick = {УдалениеДанных}
+                          disabled = {loading}
+                          >Удалить</button>
+                      </div>
+                  </div>
+                </div>
+              </div>
+                <div className = "item">
+                <div className="scrol centr">
+                  <pre>{text}</pre>
+                </div>
+              </div>
+            </div>
+            </div>
+
+            <div className = "item">
+                  <h2>fifo</h2>
+                  <table className="responsive-table">
+                    <thead>
+                      <tr>
+                          <th>N:</th>
                           {fifo.Буффер.map((Буффер) => (
-                              <td>{ Буффер[index+1] !=-1 ? Буффер[index+1] : "!"} </td> ))}
+                                  <th>{Буффер[0]}</th>
+                              ))}
+                          <th>PF:</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    {fifo.НомерСтраницы.map((НомерСтраницы, index) => (
+                      <tr>
+                        <td>{НомерСтраницы}</td>
+                        {fifo.Буффер.map((Буффер) => (
+                            <td>{ Буффер[index+1] !=-1 ? Буффер[index+1] : "!"} </td> ))}
 
-                          <td>{fifo.Pf[index]}</td>
-                        </tr>))}
-                      </tbody>
-                    </table>
+                        <td>{fifo.Pf[index]}</td>
+                      </tr>))}
+                    </tbody>
+                  </table>
 
-                    <h2>WS_Clock</h2>
+                  <h2>WS_Clock</h2>
 
-                    <table className="responsive-table">
-                      <thead>
-                        <tr>
-                        <th>ИВО:</th>
-                        <th>ВО:</th>
-                            <th>ОП:</th>
-                            {WS_Clock.Буффер.map((t,i) => (
-                              <th>
-                              <th>{i}</th>
-                              <th>БО</th>
-                              <th>БИ</th>
-                              <th>ВПИ</th>
-                              </th>
-                            ))}
-                            <th>PF:</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                      {WS_Clock.НомерСтраницы.map((НомерСтраницы, index) => (
-                        <tr>
-                          <td>{WS_Clock.ИзмененноеВремяОбращения[index]}</td>
-                          <td>{WS_Clock.ВремяОбращения[index]}</td>
-                          <td>{НомерСтраницы}</td>
-                          
-                          {WS_Clock.Буффер.map((Буффер) => (
+                  <table className="responsive-table">
+                    <thead>
+                      <tr>
+                      <th>ИВО:</th>
+                      <th>ВО:</th>
+                          <th>ОП:</th>
+                          {WS_Clock.Буффер.map((t,i) => (
                             <td>
-                              <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.ТекущаяСтраница[index] : "!"} </td>
-                              <td>{ Буффер.БитОбращения[index] !=-1 ? Буффер.БитОбращения[index] : "!"} </td>
-                              <td>{ Буффер.БитИзменения[index] !=-1 ? Буффер.БитИзменения[index] : "!"} </td>
-                              <td>{ Буффер.ВремяПоследнегоИзменения[index] !=-1 ? Буффер.ВремяПоследнегоИзменения[index] : "!"} </td>
-                              </td>))}
+                            <th>{i}</th>
+                            <th>БО</th>
+                            <th>БИ</th>
+                            <th>ВПИ</th>
+                            </td>
+                          ))}
+                          <th>PF:</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    {WS_Clock.НомерСтраницы.map((НомерСтраницы, index) => (
+                      <tr>
+                        <td>{WS_Clock.ИзмененноеВремяОбращения[index]}</td>
+                        <td>{WS_Clock.ВремяОбращения[index]}</td>
+                        <td>{НомерСтраницы}</td>
+                        
+                        {WS_Clock.Буффер.map((Буффер) => (
+                          <td>
+                            <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.ТекущаяСтраница[index] : "!"} </td>
+                            <td>{ Буффер.БитОбращения[index] !=-1 ? Буффер.БитОбращения[index] : "!"} </td>
+                            <td>{ Буффер.БитИзменения[index] !=-1 ? Буффер.БитИзменения[index] : "!"} </td>
+                            <td>{ Буффер.ВремяПоследнегоИзменения[index] !=-1 ? Буффер.ВремяПоследнегоИзменения[index] : "!"} </td>
+                            </td>))}
 
-                          <td>{WS_Clock.Pf[index]}</td>
-                        </tr>))}
-                      </tbody>
-                    </table>
-                    
-            </Route>
-            <Redirect to ="/"/>
-        </div>
-    )
+                    <td>{WS_Clock.Pf[index]}</td>
+                  </tr>))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </Route>
+      <Redirect to ="/"/>
+    </div>
+  )
 }

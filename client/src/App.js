@@ -1,5 +1,3 @@
-import "materialize-css"
-
 import {Rout} from './html';
 import {BrowserRouter} from "react-router-dom"
 

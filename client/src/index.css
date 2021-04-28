@@ -1,1 +1,76 @@
-@import "~materialize-css/dist/css/materialize.min.css"
+@import "~materialize-css/dist/css/materialize.min.css";
+
+.item {
+    flex: 1 1 200px; 
+}
+
+.horizontal {
+    display: flex;
+}
+
+.vertical{
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.scrol{
+    height: 600px;
+    overflow-y:auto;
+    width: 500px;
+}
+
+.centr{
+    margin-left: auto;
+    margin-right: auto;
+}
+.catr{
+    width: 450px;
+}
+
+.cen{
+    display: flex;
+    align-items: center ;
+    text-align:center;
+}
+.zag2{
+    font-size: 31pt!important;
+}
+.zag3 input{
+    font-size: 15pt!important;
+}
+.zag4 {
+    font-size: 15pt!important;
+    height: 45px
+}
+.notBor input{
+    border-bottom: 0px!important;
+    color: #fff;
+    padding: 0;
+    margin-left: auto!important;
+    margin-right: auto!important;
+    align-items: center!important;
+    text-align:center!important;
+}
+.select-dropdown li.disabled, .select-dropdown li.disabled>span, .select-dropdown li.optgroup {
+    color: rgba(0, 0, 0, 1)!important;
+    background-color: transparent!important;
+    width: 100%!important;
+
+}
+.zag1{
+    font-size: 35pt!important;
+}
+.rig {
+    text-align:center;
+    width: 80px!important;
+    height: 30px!important;
+}
+.btn, .btn-large, .btn-small, .btn-flat {
+    padding: 0!important;
+
+}
+.ing{
+    background-image: url("./krest.png");
+    height: 30px;
+    width: 50px
+}

@@ -31,7 +31,7 @@ var Данные = model('Данные', ШаблонДанных);
             
             const candidate = await Данные.findOne({ Название: Название })
         if(candidate){
-            return res.status(400).json({ message: 'Такое название существует! Придумайте другое или переименйте загружаемый файл' })
+            return res.status(400).json({ message: 'Такое название существует!\nПридумайте другое или переименйте загружаемый файл.' })
         }
         const данные = new Данные({ Название:Название,
                                     РазмерБуффера:РазмерБуффера,
@@ -60,7 +60,7 @@ var Данные = model('Данные', ШаблонДанных);
             const {Название} = req.body
             const candidate = await Данные.findOne({ Название: Название })
         if(!candidate){
-            return res.status(400).json({ message: 'Такого набора данных не существует' })
+            return res.status(400).json({ message: 'Такого набора данных не существует.' })
         }
         let fifo = JSON.stringify(algoritm.fifo(candidate.РазмерБуффера,candidate.Содержимое))
         let WS_Clock = JSON.stringify(algoritm.WS_Clock(candidate.РазмерБуффера,candidate.КоличествоЭлементов,
@@ -78,7 +78,8 @@ var Данные = model('Данные', ШаблонДанных);
     '/Get',
     async(req, res) => {
     try{
-        const exists = await Данные.find({}, {"Название":1, "_id":0}).lean()
+        const exists = await Данные.find({}, {"Название":1,"РазмерБуффера":1,
+        "КоличествоЭлементов":1,"КоличествоСтраниц":1,"РабочееМножество":1,"СбросОбращения":1, "_id":0}).lean()
         res.json({exists})
     } catch (e) {
         res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
@@ -93,9 +94,9 @@ var Данные = model('Данные', ШаблонДанных);
         const {Название} = req.body
         const candidate = await Данные.findOneAndDelete({ Название:Название })
         if(!candidate){
-            return res.status(400).json({ message: 'Такого набора данных не существует' })
+            return res.status(400).json({ message: 'Такого набора данных не существует.' })
         }
-        res.status(201).json({message: 'Данные удалены'})
+        res.status(201).json({message: 'Данные удалены.'})
     } catch (e) {
         res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
     }
