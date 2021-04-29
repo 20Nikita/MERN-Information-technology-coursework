@@ -11,6 +11,7 @@ export const Rout = () =>{
   let [WS_Clock, setWS_Clock] = useState({ИзмененноеВремяОбращения: [],
       ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
   let t = ""
+  let [Кнопка, setКнопка] = useState(0)
 
   const {loading, request, error, clearError}= useHttp()
   const[form, setForm] = useState({
@@ -41,18 +42,30 @@ export const Rout = () =>{
     document.getElementById("КоличествоСтраниц").value = ""
     document.getElementById("РабочееМножество").value = ""
     document.getElementById("СбросОбращения").value = ""
+    form.Название = 0
+    form.РазмерБуффера = 0
+    form.КоличествоЭлементов = 0
+    form.КоличествоСтраниц = 0
+    form.РабочееМножество = 0
+    form.СбросОбращения = 0
+    form.Содержимое = []
   }
   let [КогоЗагрузить, setКогоЗагрузить] = useState(null)
   const ОбновитьSelect = event =>{
     setКогоЗагрузить(event.target.value)
     if(event.target.value !== "0"){
-      console.log(event.target.value)
       document.getElementById("Название").value = СохранДанные[event.target.value-1].Название
       document.getElementById("РазмерБуффера").value = СохранДанные[event.target.value-1].РазмерБуффера
       document.getElementById("КоличествоЭлементов").value = СохранДанные[event.target.value-1].КоличествоЭлементов
       document.getElementById("КоличествоСтраниц").value = СохранДанные[event.target.value-1].КоличествоСтраниц
       document.getElementById("РабочееМножество").value = СохранДанные[event.target.value-1].РабочееМножество
       document.getElementById("СбросОбращения").value = СохранДанные[event.target.value-1].СбросОбращения
+      form.Название = СохранДанные[event.target.value-1].Название
+      form.РазмерБуффера = СохранДанные[event.target.value-1].РазмерБуффера
+      form.КоличествоЭлементов = СохранДанные[event.target.value-1].КоличествоЭлементов
+      form.КоличествоСтраниц = СохранДанные[event.target.value-1].КоличествоСтраниц
+      form.РабочееМножество = СохранДанные[event.target.value-1].РабочееМножество
+      form.СбросОбращения = СохранДанные[event.target.value-1].СбросОбращения
     }
   }
   let [СохранДанные, setСохранДанные] = useState([])
@@ -65,6 +78,20 @@ export const Rout = () =>{
       elems.add(new Option(`${СохранДанные[index].Название}`,`${index+1}`))
       materialize.FormSelect.init(elems, materialize.options);
     }
+    if(Кнопка==0)
+    elems.value = -1
+    if(Кнопка==1)
+    elems.value = КогоЗагрузить
+    if(Кнопка==2){
+      elems.value = СохранДанные.length
+      setКогоЗагрузить(СохранДанные.length)
+      }
+    if(Кнопка==3){
+      setКогоЗагрузить(null)
+      elems.value = -1
+    }
+    materialize.FormSelect.init(elems, materialize.options);
+    console.log(elems)
   }, [СохранДанные])
   const ЧтениеДанных = async () => {
     try{
@@ -81,23 +108,7 @@ export const Rout = () =>{
     setЗагрузить(!Загрузить)
   }
 
-  const ОтправитьФорму = async () => {
-    try{
-      form.Содержимое = Генерация(form.КоличествоСтраниц,form.КоличествоЭлементов,form.СбросОбращения)
-      const data = await request("/api/start/Add", "POST", {...form})
-      if (window.M && data.message) {
-        window.M.toast({html: data.message})
-      }
-      setЗагрузить(!Загрузить)
-      data.fifo = await JSON.parse(data.fifo)
-      data.WS_Clock = await JSON.parse(data.WS_Clock)
-      Пичать(form)
-      setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
-      setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
-      setfifo(data.fifo)
-      setWS_Clock(data.WS_Clock)
-    } catch (e) {}
-  }
+  
   const Пичать = (data) =>{
     t = ""
     t += "Название: "
@@ -124,7 +135,7 @@ export const Rout = () =>{
     t += "\n]"
     setText(t) 
   }
-  const СчитатьДанные = async () => {
+  const ЗагрузитьДанные = async () => {
     try{
       if(СохранДанные[КогоЗагрузить-1]){
         const data = await request("/api/start/getOne", "POST", СохранДанные[КогоЗагрузить-1])
@@ -133,6 +144,7 @@ export const Rout = () =>{
         }
         data.fifo = await JSON.parse(data.fifo)
         data.WS_Clock = await JSON.parse(data.WS_Clock)
+        setКнопка(1)
         Пичать(data.source)
         setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
         setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
@@ -143,36 +155,52 @@ export const Rout = () =>{
     } catch (e) {console.log(e)}
   }
 
-  
-  
+  const Сгенерировать = async () => {
+    try{
+      form.Содержимое = Генерация(form.КоличествоСтраниц,form.КоличествоЭлементов,form.СбросОбращения)
+      const data = await request("/api/start/Add", "POST", {...form})
+      if (window.M && data.message) {
+        window.M.toast({html: data.message})
+      }
+      setКнопка(2)
+      setЗагрузить(!Загрузить)
+      data.fifo = await JSON.parse(data.fifo)
+      data.WS_Clock = await JSON.parse(data.WS_Clock)
+      Пичать(form)
+      setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
+      setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
+      setfifo(data.fifo)
+      setWS_Clock(data.WS_Clock)
+    } catch (e) {}
+  }
+
   const УдалениеДанных = async () => {
     try{
       if(СохранДанные[КогоЗагрузить-1]){
-        console.log(СохранДанные[КогоЗагрузить-1])
         const data = await request("/api/start/Delete", "delete", СохранДанные[КогоЗагрузить-1])
         if (window.M && data.message) {
             window.M.toast({html: data.message})
         }
         t =  data.message
+        setКнопка(3)
         setText(t)
         setЗагрузить(!Загрузить)
         if (data.message)
           setText(data.message)
       }
     } catch (e) {}
-    
   }
-      
   
   return(
     <div>
       <Route path = "/" exact>
         <div className = "vertical">
+          <div style={{height: 20}}></div>
           <div className = "item">
             <div className = "horizontal">
               <div className = "item zag3 zag4">
                 <div className = "centr catr">
-                  <div className="card blue-grey darken-1">
+                  <div className="card blue-grey darken-1" style={{margin:0}}>
                     <div className="card-content white-text">
                       <span className="card-title cen zag1">Загрузить данные</span>
                         <div style={{height: 5}}></div>
@@ -180,7 +208,7 @@ export const Rout = () =>{
                           <div className="item">
                             <div className="btn zag4 notBor t">
                             <select onChange={ОбновитьSelect} class="materialSelect" id="myDropdown">
-                                <option disabled selected name="Название">ОТКУДА?</option>
+                                <option value="-1" disabled selected name="Название">ОТКУДА?</option>
                                 <optgroup label="с файла">
                                   <option value="0">С файла</option>
                                 </optgroup>
@@ -191,8 +219,8 @@ export const Rout = () =>{
                           </div>
                           <div style={{width: 10}}></div>
                             <button className="waves-effect waves-light btn item zag4" 
-                            onClick = {СчитатьДанные}
-                            disabled = {loading}
+                            onClick = {ЗагрузитьДанные}
+                            disabled = {!((КогоЗагрузить) * !loading)}
                             >Загрузить</button>
                       </div>
                       <div style={{height: 30}}></div>
@@ -289,21 +317,21 @@ export const Rout = () =>{
                     <div className=" horizontal card-action">
                           <button className="waves-effect waves-light btn item zag4" 
                           style={{}}
-                          onClick = {ОтправитьФорму}
+                          onClick = {Сгенерировать}
                           disabled = {loading}
                           >Сгенерировать</button>
                           <div style={{width: 10}}></div>
                           <button className="waves-effect waves-light btn item zag4" 
                           style={{}}
                           onClick = {УдалениеДанных}
-                          disabled = {loading}
+                          disabled = {!((КогоЗагрузить) * !loading)}
                           >Удалить</button>
                       </div>
                   </div>
                 </div>
               </div>
                 <div className = "item">
-                <div className="scrol centr">
+                <div className="scrol centr text">
                   <pre>{text}</pre>
                 </div>
               </div>
@@ -311,68 +339,77 @@ export const Rout = () =>{
             </div>
 
             <div className = "item">
+            <div className = "horizontal">
+            <div style={{width: 20}}></div>
+            <div className = "item">
                   <h2>fifo</h2>
-                  <table className="responsive-table">
-                    <thead>
-                      <tr>
-                          <th>N:</th>
+                  <div className = "tabl">
+                    <table className="responsive-table1">
+                      <thead>
+                        <tr>
+                            <th>N:</th>
+                            {fifo.Буффер.map((Буффер) => (
+                                    <th>{Буффер[0]}</th>
+                                ))}
+                            <th>PF:</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      {fifo.НомерСтраницы.map((НомерСтраницы, index) => (
+                        <tr>
+                          <td>{НомерСтраницы}</td>
                           {fifo.Буффер.map((Буффер) => (
-                                  <th>{Буффер[0]}</th>
-                              ))}
-                          <th>PF:</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                    {fifo.НомерСтраницы.map((НомерСтраницы, index) => (
-                      <tr>
-                        <td>{НомерСтраницы}</td>
-                        {fifo.Буффер.map((Буффер) => (
-                            <td>{ Буффер[index+1] !=-1 ? Буффер[index+1] : "!"} </td> ))}
+                              <td>{ Буффер[index+1] !=-1 ? Буффер[index+1] : "!"} </td> ))}
 
-                        <td>{fifo.Pf[index]}</td>
-                      </tr>))}
-                    </tbody>
-                  </table>
-
+                          <td>{fifo.Pf[index]}</td>
+                        </tr>))}
+                      </tbody>
+                    </table>
+                  </div>
                   <h2>WS_Clock</h2>
+                  <div className = "tabl">
+                    <table className="responsive-table1 ">
+                      <thead>
+                        <tr>
+                        <th>ИВО:</th>
+                        <th>ВО:</th>
+                            <th>ОП:</th>
+                            {WS_Clock.Буффер.map((t,i) => (
+                              <td style={{padding:0,border:0}}>
+                              <th>{i}</th>
+                              <th>БО</th>
+                              <th>БИ</th>
+                              <th>ВПИ</th>
+                              </td>
+                            ))}
+                            <th>PF:</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      {WS_Clock.НомерСтраницы.map((НомерСтраницы, index) => (
+                        <tr>
+                          <td>{WS_Clock.ИзмененноеВремяОбращения[index]}</td>
+                          <td>{WS_Clock.ВремяОбращения[index]}</td>
+                          <td>{НомерСтраницы}</td>
+                          
+                          {WS_Clock.Буффер.map((Буффер) => (
+                            <td style={{padding:0,border:0}}>
+                              <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.ТекущаяСтраница[index] : "!"} </td>
+                              <td>{ Буффер.БитОбращения[index] !=-1 ? Буффер.БитОбращения[index] : "!"} </td>
+                              <td>{ Буффер.БитИзменения[index] !=-1 ? Буффер.БитИзменения[index] : "!"} </td>
+                              <td>{ Буффер.ВремяПоследнегоИзменения[index] !=-1 ? Буффер.ВремяПоследнегоИзменения[index] : "!"} </td>
+                              </td>))}
 
-                  <table className="responsive-table">
-                    <thead>
-                      <tr>
-                      <th>ИВО:</th>
-                      <th>ВО:</th>
-                          <th>ОП:</th>
-                          {WS_Clock.Буффер.map((t,i) => (
-                            <td>
-                            <th>{i}</th>
-                            <th>БО</th>
-                            <th>БИ</th>
-                            <th>ВПИ</th>
-                            </td>
-                          ))}
-                          <th>PF:</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                    {WS_Clock.НомерСтраницы.map((НомерСтраницы, index) => (
-                      <tr>
-                        <td>{WS_Clock.ИзмененноеВремяОбращения[index]}</td>
-                        <td>{WS_Clock.ВремяОбращения[index]}</td>
-                        <td>{НомерСтраницы}</td>
-                        
-                        {WS_Clock.Буффер.map((Буффер) => (
-                          <td>
-                            <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.ТекущаяСтраница[index] : "!"} </td>
-                            <td>{ Буффер.БитОбращения[index] !=-1 ? Буффер.БитОбращения[index] : "!"} </td>
-                            <td>{ Буффер.БитИзменения[index] !=-1 ? Буффер.БитИзменения[index] : "!"} </td>
-                            <td>{ Буффер.ВремяПоследнегоИзменения[index] !=-1 ? Буффер.ВремяПоследнегоИзменения[index] : "!"} </td>
-                            </td>))}
-
-                    <td>{WS_Clock.Pf[index]}</td>
-                  </tr>))}
-                </tbody>
-              </table>
+                      <td className="">{WS_Clock.Pf[index]}</td>
+                    </tr>))}
+                  </tbody>
+                </table>
+              </div>
             </div>
+            <div style={{width: 20}}></div>
+            </div>
+            </div>
+            <div style={{height: 50}}></div>
           </div>
         </Route>
       <Redirect to ="/"/>

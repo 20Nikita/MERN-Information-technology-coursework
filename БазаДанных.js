@@ -47,7 +47,7 @@ var Данные = model('Данные', ШаблонДанных);
         res.status(201).json({ message: 'Данные сохранены', fifo: fifo, WS_Clock: WS_Clock })
         } catch (e) {
             console.log(e)
-            res.status(500).json({message: {message: 'Что-то пошло не так, попробуйте снова'}})
+            res.status(500).json( {message: 'Что-то пошло не так, попробуйте снова'})
         }
     }
 )
