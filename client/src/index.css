@@ -3,9 +3,27 @@
 .item {
     flex: 1 1 200px; 
 }
+.ots {
+    margin-left: 20px;
+    margin-right: 20px
+}
 
 .horizontal {
     display: flex;
+}
+body {
+    background-image:  url(./фон.jpg) ;
+    background-position: center ;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: 100%;
+}
+.becc{
+    background-color: rgba(95, 136, 175, 0.8);
+}
+
+h2 {
+    color: #fff;
 }
 
 .vertical{
@@ -40,7 +58,7 @@
 }
 .zag4 {
     font-size: 15pt!important;
-    height: 45px
+    height: 45px;
 }
 .notBor input{
     border-bottom: 0px!important;
@@ -74,24 +92,31 @@
     height: 30px;
     width: 50px
 }
+.ing2{
+    background-image: url("./unnamed.jpg");
+    background-image: "url(./unnamed.jpg)"
+}
 .tabl {
     height: 500px;
     border:2px solid rgba(0, 0, 0, 1);
     overflow-y:auto;
     overflow-x:auto;
+    width:100%!important;
 }
 .text{
     border:2px solid rgba(0, 0, 0, 1);
+    color:rgb(255, 255, 255);
 }
+
 
 table.responsive-table1{width:100%;display:block;position:relative}
 table.responsive-table1 td:empty:before{content:'\00a0'}
 table.responsive-table1 th,table.responsive-table td{margin:0;vertical-align:top}
-table.responsive-table1 th{text-align:left; padding:0px}
+table.responsive-table1 th{text-align:left; padding:0px; color: rgb(255, 255, 255);}
 table.responsive-table1 thead{display:block;float:left ;}
 table.responsive-table1 thead tr{display:block;}
 table.responsive-table1 thead tr th::before{content:"\00a0"}
 table.responsive-table1 tbody{display:block;width:auto;position:relative;white-space:nowrap}
 table.responsive-table1 tbody tr{display:inline-block;vertical-align:top}
-table.responsive-table1 th{display:block;text-align:right;border:1px solid rgba(0, 0, 0, 0.5);padding:5px}
-table.responsive-table1 td{display:block;min-height:1.25em;text-align:left; padding:5px;border:1px solid rgba(0, 0, 0, 0.5)}
+table.responsive-table1 th{display:block;text-align:right;border:1px solid rgb(0, 0, 0);padding:5px}
+table.responsive-table1 td{display:block;min-height:1.25em;text-align:left;color: rgb(255, 255, 255); padding:5px;border:1px solid rgb(0, 0, 0)}

@@ -3,6 +3,8 @@ import React, {useEffect, useState} from 'react';
 import { useHttp } from './hooks/http.hooks';
 import { Генерация } from './Генерация';
 import materialize from "materialize-css";
+import BannerBgImg1 from "./unnamed.jpg";
+
 
 
 export const Rout = () =>{
@@ -185,6 +187,9 @@ export const Rout = () =>{
         setКнопка(3)
         setText(t)
         setЗагрузить(!Загрузить)
+        setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
+        setWS_Clock({ИзмененноеВремяОбращения: [],
+        ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
         if (data.message)
           setText(data.message)
       }
@@ -197,7 +202,7 @@ export const Rout = () =>{
         <div className = "vertical">
           <div style={{height: 20}}></div>
           <div className = "item">
-            <div className = "horizontal">
+            <div className = "horizontal ">
               <div className = "item zag3 zag4">
                 <div className = "centr catr">
                   <div className="card blue-grey darken-1" style={{margin:0}}>
@@ -331,19 +336,16 @@ export const Rout = () =>{
                 </div>
               </div>
                 <div className = "item">
-                <div className="scrol centr text">
-                  <pre>{text}</pre>
+                <div className="scrol centr text becc">
+                  <pre >{text}</pre>
                 </div>
               </div>
             </div>
             </div>
 
-            <div className = "item">
-            <div className = "horizontal">
-            <div style={{width: 20}}></div>
-            <div className = "item">
+            <div className = "item ots">
                   <h2>fifo</h2>
-                  <div className = "tabl">
+                  <div className = "tabl becc">
                     <table className="responsive-table1">
                       <thead>
                         <tr>
@@ -367,8 +369,8 @@ export const Rout = () =>{
                     </table>
                   </div>
                   <h2>WS_Clock</h2>
-                  <div className = "tabl">
-                    <table className="responsive-table1 ">
+                  <div className = "tabl becc">
+                    <table className="responsive-table1">
                       <thead>
                         <tr>
                         <th>ИВО:</th>
@@ -405,9 +407,7 @@ export const Rout = () =>{
                   </tbody>
                 </table>
               </div>
-            </div>
             <div style={{width: 20}}></div>
-            </div>
             </div>
             <div style={{height: 50}}></div>
           </div>
