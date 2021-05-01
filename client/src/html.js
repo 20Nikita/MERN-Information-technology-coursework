@@ -361,7 +361,7 @@ export const Rout = () =>{
                         <tr>
                           <td>{НомерСтраницы}</td>
                           {fifo.Буффер.map((Буффер) => (
-                              <td>{ Буффер[index+1] !=-1 ? Буффер[index+1] : "!"} </td> ))}
+                              <td>{ Буффер[index+1] !=-1 ? Буффер[index+1] : "."} </td> ))}
 
                           <td>{fifo.Pf[index]}</td>
                         </tr>))}

@@ -5,7 +5,7 @@ const  algoritm  = require('./algs')
 const stringSchema = new Schema({
     НомерСтраницы: {type: Number, required: true},
     ВремяОбращения: {type: Number, required: true},
-    Запись: {type: Boolean, required: true},
+    Запись: {type: Number, required: true},
 })
 
 const ШаблонДанных = new Schema({
