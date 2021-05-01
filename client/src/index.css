@@ -22,7 +22,7 @@ body {
     background-color: rgba(95, 136, 175, 0.8);
 }
 
-h2 {
+h2, h4 {
     color: #fff;
 }
 
@@ -97,7 +97,7 @@ h2 {
     background-image: "url(./unnamed.jpg)"
 }
 .tabl {
-    height: 500px;
+    max-height: 500px;
     border:2px solid rgba(0, 0, 0, 1);
     overflow-y:auto;
     overflow-x:auto;

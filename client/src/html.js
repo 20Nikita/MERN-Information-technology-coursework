@@ -9,8 +9,10 @@ import BannerBgImg1 from "./unnamed.jpg";
 export const Rout = () =>{
   let [text, setText] = useState("")
   let [fifo, setfifo] = useState({Буффер: [],НомерСтраницы:[],Pf: []})
+  let [ЭФ_fifo, setЭФ_fifo] = useState(0)
   let [WS_Clock, setWS_Clock] = useState({ИзмененноеВремяОбращения: [],
       ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
+  let [ЭФ_WS_Clock, setЭФ_WS_Clock] = useState(0)
   let t = ""
   let [Кнопка, setКнопка] = useState(0)
 
@@ -149,7 +151,18 @@ export const Rout = () =>{
         Пичать(data.source)
         setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
         setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
-        setfifo(data.fifo) 
+        setfifo(data.fifo)
+        t=0
+        for (let i = 0; i < data.fifo.Pf.length; i++) {
+          t+=data.fifo.Pf[i]
+        }
+        setЭФ_fifo(t)
+        t=0
+        for (let i = 0; i < data.WS_Clock.Pf.length; i++) {
+          if(data.WS_Clock.Pf[i]!=-1)
+            t+=data.WS_Clock.Pf[i]
+        }
+        setЭФ_WS_Clock(t)
         setЗагрузить(!Загрузить)
         setWS_Clock(data.WS_Clock)
       }
@@ -175,6 +188,17 @@ export const Rout = () =>{
       setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
       setfifo(data.fifo)
       setWS_Clock(data.WS_Clock)
+      t=0
+      for (let i = 0; i < data.fifo.Pf.length; i++) {
+        t+=data.fifo.Pf[i]
+      }
+      setЭФ_fifo(t)
+      t=0
+      for (let i = 0; i < data.WS_Clock.Pf.length; i++) {
+        if(data.WS_Clock.Pf[i]!=-1)
+          t+=data.WS_Clock.Pf[i]
+      }
+      setЭФ_WS_Clock(t)
     } catch (e) {console.log(e)}
   }
 
@@ -192,6 +216,8 @@ export const Rout = () =>{
         setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
         setWS_Clock({ИзмененноеВремяОбращения: [],
         ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
+        setЭФ_fifo(0)
+        setЭФ_WS_Clock(0)
         if (data.message)
           setText(data.message)
       }
@@ -370,6 +396,7 @@ export const Rout = () =>{
                       </tbody>
                     </table>
                   </div>
+                  <h4>NPF = {ЭФ_fifo}</h4>
                   <h2>WS_Clock</h2>
                   <div className = "tabl becc">
                     <table className="responsive-table1">
@@ -392,9 +419,9 @@ export const Rout = () =>{
                       <tbody>
                       {WS_Clock.НомерСтраницы.map((НомерСтраницы, index) => (
                         <tr>
-                          <td>{WS_Clock.ИзмененноеВремяОбращения[index]}</td>
-                          <td>{WS_Clock.ВремяОбращения[index]}</td>
-                          <td>{НомерСтраницы}</td>
+                          <td>{WS_Clock.ИзмененноеВремяОбращения[index] !=-1 ? WS_Clock.ИзмененноеВремяОбращения[index] : "."}</td>
+                          <td>{WS_Clock.ВремяОбращения[index] !=-1 ? WS_Clock.ВремяОбращения[index] : "."}</td>
+                          <td>{НомерСтраницы !=-1 ? НомерСтраницы : "."}</td>
                           
                           {WS_Clock.Буффер.map((Буффер) => (
                             <td style={{padding:0,border:0}}>
@@ -404,11 +431,12 @@ export const Rout = () =>{
                               <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.ВремяПоследнегоИзменения[index] : "."} </td>
                               </td>))}
 
-                      <td className="">{WS_Clock.Pf[index]}</td>
+                      <td className="">{WS_Clock.Pf[index] !=-1 ? WS_Clock.Pf[index] : "."}</td>
                     </tr>))}
                   </tbody>
                 </table>
               </div>
+              <h4>NPF = {ЭФ_WS_Clock}</h4>
             <div style={{width: 20}}></div>
             </div>
             <div style={{height: 50}}></div>
