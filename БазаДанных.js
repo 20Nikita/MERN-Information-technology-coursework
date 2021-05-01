@@ -1,6 +1,7 @@
 const {Router} = require('express')
 const {Schema, model} = require('mongoose')
 const  algoritm  = require('./algs')
+const  Генерация  = require('./Генерация')
 
 const stringSchema = new Schema({
     НомерСтраницы: {type: Number, required: true},
@@ -27,9 +28,8 @@ var Данные = model('Данные', ШаблонДанных);
     "/Add",
     async(req, res) => {
         try {
-            const {Название, РазмерБуффера, КоличествоЭлементов,КоличествоСтраниц, РабочееМножество, СбросОбращения, Содержимое} = req.body
-            
-            const candidate = await Данные.findOne({ Название: Название })
+        const {Название, РазмерБуффера, КоличествоЭлементов,КоличествоСтраниц, РабочееМножество, СбросОбращения, Содержимое} = req.body
+        const candidate = await Данные.findOne({ Название: Название })
         if(candidate){
             return res.status(400).json({ message: 'Такое название существует!\nПридумайте другое или переименйте загружаемый файл.' })
         }
@@ -101,5 +101,21 @@ var Данные = model('Данные', ШаблонДанных);
         res.status(500).json({message: 'Что-то пошло не так, попробуйте снова'})
     }
 })
+
+// /api/start/Gen
+БазаДанных.post(
+    "/Gen",
+    async(req, res) => {
+        try {
+        const {t1,t2,КоличествоЭлементов,КоличествоСтраниц,t3,СбросОбращения} = req.body
+        Содержимое = Генерация.Генерация(КоличествоСтраниц,КоличествоЭлементов,СбросОбращения)
+        console.log(Содержимое)
+        res.status(201).json({ message: 'Данные сгенерированы', Содержимое:Содержимое })
+        } catch (e) {
+            console.log(e)
+            res.status(500).json( {message: 'Что-то пошло не так, попробуйте снова'})
+        }
+    }
+)
 
 module.exports = БазаДанных

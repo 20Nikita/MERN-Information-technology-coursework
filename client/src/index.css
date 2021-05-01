@@ -108,7 +108,7 @@ h2 {
     color:rgb(255, 255, 255);
 }
 
-
+.jir {font-weight:bolder}
 table.responsive-table1{width:100%;display:block;position:relative}
 table.responsive-table1 td:empty:before{content:'\00a0'}
 table.responsive-table1 th,table.responsive-table td{margin:0;vertical-align:top}

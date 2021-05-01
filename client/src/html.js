@@ -1,7 +1,6 @@
 import {Redirect, Route} from "react-router-dom"
 import React, {useEffect, useState} from 'react';
 import { useHttp } from './hooks/http.hooks';
-import { Генерация } from './Генерация';
 import materialize from "materialize-css";
 import BannerBgImg1 from "./unnamed.jpg";
 
@@ -159,8 +158,11 @@ export const Rout = () =>{
 
   const Сгенерировать = async () => {
     try{
-      form.Содержимое = Генерация(form.КоличествоСтраниц,form.КоличествоЭлементов,form.СбросОбращения)
+      form.Содержимое = await request("/api/start/Gen", "POST", {...form})
+      form.Содержимое = form.Содержимое.Содержимое
+      console.log(form.Содержимое)
       const data = await request("/api/start/Add", "POST", {...form})
+      console.log(data)
       if (window.M && data.message) {
         window.M.toast({html: data.message})
       }
@@ -173,7 +175,7 @@ export const Rout = () =>{
       setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
       setfifo(data.fifo)
       setWS_Clock(data.WS_Clock)
-    } catch (e) {}
+    } catch (e) {console.log(e)}
   }
 
   const УдалениеДанных = async () => {
@@ -396,10 +398,10 @@ export const Rout = () =>{
                           
                           {WS_Clock.Буффер.map((Буффер) => (
                             <td style={{padding:0,border:0}}>
-                              <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.ТекущаяСтраница[index] : "!"} </td>
-                              <td>{ Буффер.БитОбращения[index] !=-1 ? Буффер.БитОбращения[index] : "!"} </td>
-                              <td>{ Буффер.БитИзменения[index] !=-1 ? Буффер.БитИзменения[index] : "!"} </td>
-                              <td>{ Буффер.ВремяПоследнегоИзменения[index] !=-1 ? Буффер.ВремяПоследнегоИзменения[index] : "!"} </td>
+                              <td className = "jir">{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.ТекущаяСтраница[index] : "."} </td>
+                              <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.БитОбращения[index] : "."} </td>
+                              <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.БитИзменения[index] : "."} </td>
+                              <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.ВремяПоследнегоИзменения[index] : "."} </td>
                               </td>))}
 
                       <td className="">{WS_Clock.Pf[index]}</td>
