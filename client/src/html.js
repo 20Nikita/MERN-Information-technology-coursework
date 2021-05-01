@@ -15,7 +15,7 @@ export const Rout = () =>{
   let [ЭФ_WS_Clock, setЭФ_WS_Clock] = useState(0)
   let t = ""
   let [Кнопка, setКнопка] = useState(0)
-
+  let [ФайлПрочитан, setФайлПрочитан] = useState(0)
   const {loading, request, error, clearError}= useHttp()
   const[form, setForm] = useState({
     Название: "", 
@@ -53,9 +53,10 @@ export const Rout = () =>{
     form.СбросОбращения = 0
     form.Содержимое = []
   }
-  let [КогоЗагрузить, setКогоЗагрузить] = useState(null)
+  let [КогоЗагрузить, setКогоЗагрузить] = useState(-1)
   const ОбновитьSelect = event =>{
     setКогоЗагрузить(event.target.value)
+    setФайлПрочитан(0)
     if(event.target.value !== "0"){
       document.getElementById("Название").value = СохранДанные[event.target.value-1].Название
       document.getElementById("РазмерБуффера").value = СохранДанные[event.target.value-1].РазмерБуффера
@@ -90,7 +91,7 @@ export const Rout = () =>{
       setКогоЗагрузить(СохранДанные.length)
       }
     if(Кнопка==3){
-      setКогоЗагрузить(null)
+      setКогоЗагрузить(-1)
       elems.value = -1
     }
     materialize.FormSelect.init(elems, materialize.options);
@@ -253,7 +254,7 @@ export const Rout = () =>{
                           <div style={{width: 10}}></div>
                             <button className="waves-effect waves-light btn item zag4" 
                             onClick = {ЗагрузитьДанные}
-                            disabled = {!((КогоЗагрузить) * !loading)}
+                            disabled = {!((КогоЗагрузить != -1) * !loading)}
                             >Загрузить</button>
                       </div>
                       <div style={{height: 30}}></div>
@@ -357,7 +358,7 @@ export const Rout = () =>{
                           <button className="waves-effect waves-light btn item zag4" 
                           style={{}}
                           onClick = {УдалениеДанных}
-                          disabled = {!((КогоЗагрузить) * !loading)}
+                          disabled = {!((КогоЗагрузить != -1 * ФайлПрочитан) * !loading)}
                           >Удалить</button>
                       </div>
                   </div>
