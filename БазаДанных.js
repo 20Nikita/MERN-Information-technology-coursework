@@ -16,6 +16,7 @@ const ШаблонДанных = new Schema({
     КоличествоСтраниц: {type: Number, required: true},
     РабочееМножество: {type: Number, required: true},
     СбросОбращения: {type: Number, required: true},
+    ВЗД: {type: Number, required: true},
     Содержимое: [stringSchema]
 })
 
@@ -28,7 +29,7 @@ var Данные = model('Данные', ШаблонДанных);
     "/Add",
     async(req, res) => {
         try {
-        const {Название, РазмерБуффера, КоличествоЭлементов,КоличествоСтраниц, РабочееМножество, СбросОбращения, Содержимое} = req.body
+        const {Название, РазмерБуффера, КоличествоЭлементов,КоличествоСтраниц, РабочееМножество, СбросОбращения, ВЗД, Содержимое} = req.body
         const candidate = await Данные.findOne({ Название: Название })
         if(candidate){
             return res.status(400).json({ message: 'Такое название существует!\nПридумайте другое или переименйте загружаемый файл.' })
@@ -39,11 +40,12 @@ var Данные = model('Данные', ШаблонДанных);
                                     КоличествоСтраниц:КоличествоСтраниц,
                                     РабочееМножество:РабочееМножество,
                                     СбросОбращения:СбросОбращения,
+                                    ВЗД:ВЗД,
                                     Содержимое:Содержимое})
         await данные.save()
         let fifo = JSON.stringify(algoritm.fifo(РазмерБуффера,Содержимое))
         let WS_Clock = JSON.stringify(algoritm.WS_Clock(РазмерБуффера, КоличествоЭлементов,
-            КоличествоСтраниц, РабочееМножество, СбросОбращения, Содержимое))
+            ВЗД, РабочееМножество, СбросОбращения, Содержимое))
         res.status(201).json({ message: 'Данные сохранены', fifo: fifo, WS_Clock: WS_Clock })
         } catch (e) {
             console.log(e)
@@ -64,7 +66,7 @@ var Данные = model('Данные', ШаблонДанных);
         }
         let fifo = JSON.stringify(algoritm.fifo(candidate.РазмерБуффера,candidate.Содержимое))
         let WS_Clock = JSON.stringify(algoritm.WS_Clock(candidate.РазмерБуффера,candidate.КоличествоЭлементов,
-            candidate.КоличествоСтраниц, candidate.РабочееМножество,candidate.СбросОбращения,candidate.Содержимое))
+            candidate.ВЗД, candidate.РабочееМножество,candidate.СбросОбращения,candidate.Содержимое))
             res.status(201).json({ message: 'Данные найдены', source: candidate, fifo: fifo, WS_Clock: WS_Clock })
         } catch (e) {
             console.log(e)
@@ -79,7 +81,7 @@ var Данные = model('Данные', ШаблонДанных);
     async(req, res) => {
     try{
         const exists = await Данные.find({}, {"Название":1,"РазмерБуффера":1,
-        "КоличествоЭлементов":1,"КоличествоСтраниц":1,"РабочееМножество":1,"СбросОбращения":1, "_id":0}).lean()
+        "КоличествоЭлементов":1,"КоличествоСтраниц":1,"РабочееМножество":1,"СбросОбращения":1, "ВЗД":1, "_id":0}).lean()
         res.json({exists})
     } catch (e) {
         console.log(e)
@@ -109,7 +111,7 @@ var Данные = model('Данные', ШаблонДанных);
     "/Gen",
     async(req, res) => {
         try {
-        const {t1,t2,КоличествоЭлементов,КоличествоСтраниц,t3,СбросОбращения} = req.body
+        const {t1,t2,КоличествоЭлементов,КоличествоСтраниц,t3,СбросОбращения,t4} = req.body
         Содержимое = Генерация.Генерация(КоличествоСтраниц,КоличествоЭлементов,СбросОбращения)
         res.status(201).json({ message: 'Данные сгенерированы', Содержимое:Содержимое })
         } catch (e) {

@@ -1,5 +1,6 @@
 import {Redirect, Route} from "react-router-dom"
 import React, {useEffect, useState} from 'react';
+import cn from "classnames";
 import { useHttp } from './hooks/http.hooks';
 import materialize from "materialize-css";
 import BannerBgImg1 from "./unnamed.jpg";
@@ -11,7 +12,7 @@ export const Rout = () =>{
   let [fifo, setfifo] = useState({Буффер: [],НомерСтраницы:[],Pf: []})
   let [ЭФ_fifo, setЭФ_fifo] = useState(0)
   let [WS_Clock, setWS_Clock] = useState({ИзмененноеВремяОбращения: [],
-      ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
+      ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: [], Стили: []})
   let [ЭФ_WS_Clock, setЭФ_WS_Clock] = useState(0)
   let t = ""
   let [Кнопка, setКнопка] = useState(0)
@@ -24,6 +25,7 @@ export const Rout = () =>{
     КоличествоСтраниц: 0,
     РабочееМножество: 0, 
     СбросОбращения: 0,
+    ВЗД: 0,
     Содержимое: []
   })
   useEffect( () => {
@@ -45,12 +47,14 @@ export const Rout = () =>{
     document.getElementById("КоличествоСтраниц").value = ""
     document.getElementById("РабочееМножество").value = ""
     document.getElementById("СбросОбращения").value = ""
+    document.getElementById("ВЗД").value = ""
     form.Название = 0
     form.РазмерБуффера = 0
     form.КоличествоЭлементов = 0
     form.КоличествоСтраниц = 0
     form.РабочееМножество = 0
     form.СбросОбращения = 0
+    form.ВЗД = 0
     form.Содержимое = []
   }
   let [КогоЗагрузить, setКогоЗагрузить] = useState(-1)
@@ -64,12 +68,14 @@ export const Rout = () =>{
       document.getElementById("КоличествоСтраниц").value = СохранДанные[event.target.value-1].КоличествоСтраниц
       document.getElementById("РабочееМножество").value = СохранДанные[event.target.value-1].РабочееМножество
       document.getElementById("СбросОбращения").value = СохранДанные[event.target.value-1].СбросОбращения
+      document.getElementById("ВЗД").value = СохранДанные[event.target.value-1].ВЗД
       form.Название = СохранДанные[event.target.value-1].Название
       form.РазмерБуффера = СохранДанные[event.target.value-1].РазмерБуффера
       form.КоличествоЭлементов = СохранДанные[event.target.value-1].КоличествоЭлементов
       form.КоличествоСтраниц = СохранДанные[event.target.value-1].КоличествоСтраниц
       form.РабочееМножество = СохранДанные[event.target.value-1].РабочееМножество
       form.СбросОбращения = СохранДанные[event.target.value-1].СбросОбращения
+      form.ВЗД = СохранДанные[event.target.value-1].ВЗД
     }
   }
   let [СохранДанные, setСохранДанные] = useState([])
@@ -95,7 +101,6 @@ export const Rout = () =>{
       elems.value = -1
     }
     materialize.FormSelect.init(elems, materialize.options);
-    console.log(elems)
   }, [СохранДанные])
   const ЧтениеДанных = async () => {
     try{
@@ -127,6 +132,8 @@ export const Rout = () =>{
     t += data.РабочееМножество
     t += "\nСброс обращения: "
     t += data.СбросОбращения
+    t += "\nВремя записи: "
+    t += data.ВЗД
     t += "\nСодержимое: ["
     for (let index = 0; index < data.Содержимое.length; index++) {
       t += "\nНомер cтраницы: "
@@ -151,7 +158,8 @@ export const Rout = () =>{
         setКнопка(1)
         Пичать(data.source)
         setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
-        setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
+        setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: [], Стили: []})
+        clacc(data.WS_Clock.Стили,data.WS_Clock.Pf.length - 1,data.WS_Clock.Буффер.length*4+3)
         setfifo(data.fifo)
         t=0
         for (let i = 0; i < data.fifo.Pf.length; i++) {
@@ -166,6 +174,7 @@ export const Rout = () =>{
         setЭФ_WS_Clock(t)
         setЗагрузить(!Загрузить)
         setWS_Clock(data.WS_Clock)
+        console.log(data.WS_Clock.Стили)
       }
     } catch (e) {console.log(e)}
   }
@@ -174,9 +183,7 @@ export const Rout = () =>{
     try{
       form.Содержимое = await request("/api/start/Gen", "POST", {...form})
       form.Содержимое = form.Содержимое.Содержимое
-      console.log(form.Содержимое)
       const data = await request("/api/start/Add", "POST", {...form})
-      console.log(data)
       if (window.M && data.message) {
         window.M.toast({html: data.message})
       }
@@ -187,6 +194,7 @@ export const Rout = () =>{
       Пичать(form)
       setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
       setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
+      clacc(data.WS_Clock.Стили,data.WS_Clock.Pf.length,data.WS_Clock.Буффер.length*4+3)
       setfifo(data.fifo)
       setWS_Clock(data.WS_Clock)
       t=0
@@ -216,7 +224,7 @@ export const Rout = () =>{
         setЗагрузить(!Загрузить)
         setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
         setWS_Clock({ИзмененноеВремяОбращения: [],
-        ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
+        ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: [], Стили: []})
         setЭФ_fifo(0)
         setЭФ_WS_Clock(0)
         if (data.message)
@@ -224,7 +232,16 @@ export const Rout = () =>{
       }
     } catch (e) {}
   }
-  
+  let [Clacc, setClacc] = useState("")
+  const clacc = async (Стили,x,y) => {
+    t = Array.from(Array(x), () => new Array(y))
+    
+    for (let i = 0; i < Стили.length; i++) {
+      t[Стили[i][0]][Стили[i][1]] = Стили[i][2]
+    }
+    setClacc(t)
+    console.log(t)
+  }
   return(
     <div>
       <Route path = "/" exact>
@@ -343,6 +360,19 @@ export const Rout = () =>{
                               type="Number" 
                               className="validate rig" 
                               onChange={ОбновитьФорму}/>
+                            </div>
+
+                            <div className = "horizontal">
+                              <p className = "cen"
+                              style={{width: 350}}
+                              >Время записи на диск</p>
+
+                              <input placeholder=" >= 0 " 
+                              id="ВЗД" 
+                              name="ВЗД" 
+                              type="Number" 
+                              className="validate rig" 
+                              onChange={ОбновитьФорму}/>
                           </div>
                         </div>
                       </div>
@@ -421,14 +451,24 @@ export const Rout = () =>{
                       {WS_Clock.НомерСтраницы.map((НомерСтраницы, index) => (
                         <tr>
                           <td>{WS_Clock.ИзмененноеВремяОбращения[index] !=-1 ? WS_Clock.ИзмененноеВремяОбращения[index] : "."}</td>
-                          <td>{WS_Clock.ВремяОбращения[index] !=-1 ? WS_Clock.ВремяОбращения[index] : "."}</td>
-                          <td>{НомерСтраницы !=-1 ? НомерСтраницы : "."}</td>
+                          <td className = {cn({
+                            ["green"]: Clacc[index][1] === 3
+                          })}>{WS_Clock.ВремяОбращения[index] !=-1 ? WS_Clock.ВремяОбращения[index] : "."}</td>
                           
-                          {WS_Clock.Буффер.map((Буффер) => (
+                          <td className = {cn({
+                            ["yellow"]: Clacc[index][2] === 2,
+                        })}>{НомерСтраницы !=-1 ? НомерСтраницы : "."}</td>
+                          
+                          {WS_Clock.Буффер.map((Буффер,y) => (
                             <td style={{padding:0,border:0}}>
-                              <td className = "jir">{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.ТекущаяСтраница[index] : "."} </td>
+                              <td className = {cn({
+                                ["red jir"]: Clacc[index][y*4+3] === 1,
+                                ["jir"]: Clacc[index][y*4+3] !== 1, 
+                                })}>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.ТекущаяСтраница[index] : "."} </td>
                               <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.БитОбращения[index] : "."} </td>
-                              <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.БитИзменения[index] : "."} </td>
+                              <td className = {cn({
+                                ["green"]: Clacc[index][y*4+5] === 3, 
+                                })}>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.БитИзменения[index] : "."} </td>
                               <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.ВремяПоследнегоИзменения[index] : "."} </td>
                               </td>))}
 
