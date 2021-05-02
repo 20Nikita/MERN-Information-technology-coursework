@@ -48,7 +48,7 @@ export const Rout = () =>{
     document.getElementById("РабочееМножество").value = ""
     document.getElementById("СбросОбращения").value = ""
     document.getElementById("ВЗД").value = ""
-    form.Название = 0
+    form.Название = ""
     form.РазмерБуффера = 0
     form.КоличествоЭлементов = 0
     form.КоличествоСтраниц = 0
@@ -56,8 +56,14 @@ export const Rout = () =>{
     form.СбросОбращения = 0
     form.ВЗД = 0
     form.Содержимое = []
+    setText("")
+    setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
+    setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: [], Стили: []})
+    setЭФ_fifo("")
+    setЭФ_WS_Clock("")
   }
   let [КогоЗагрузить, setКогоЗагрузить] = useState(-1)
+  let [ОтУд, setОтУд] = useState("Удалить")
   const ОбновитьSelect = event =>{
     setКогоЗагрузить(event.target.value)
     setФайлПрочитан(0)
@@ -76,7 +82,8 @@ export const Rout = () =>{
       form.РабочееМножество = СохранДанные[event.target.value-1].РабочееМножество
       form.СбросОбращения = СохранДанные[event.target.value-1].СбросОбращения
       form.ВЗД = СохранДанные[event.target.value-1].ВЗД
-    }
+      setОтУд("Удалить")
+    } else setОтУд("Отправить")
   }
   let [СохранДанные, setСохранДанные] = useState([])
   useEffect( () => {
@@ -146,6 +153,24 @@ export const Rout = () =>{
     t += "\n]"
     setText(t) 
   }
+
+  const Проверка = () => {
+    if(form.Название.length < 3)
+    return "Название должно быть > 2 символов"
+    if(form.РазмерБуффера < 1)
+    return "Размер Буффера должен быть > 0"
+    if(form.КоличествоЭлементов < 1)
+    return "Количество элементов должно быть > 0"
+    if(form.КоличествоСтраниц < 1)
+    return "Количество страниц должно быть > 0"
+    if(form.РабочееМножество < 1)
+    return "Рабочее множество должно быть > 0"
+    if(form.СбросОбращения < 2)
+    return "Время сброса обращения должно быть > 1"
+    if(form.ВЗД < 0)
+    return "Время записи на диск должно быть >= 0"
+    return 0
+  }
   const ЗагрузитьДанные = async () => {
     try{
       if(СохранДанные[КогоЗагрузить-1]){
@@ -174,41 +199,81 @@ export const Rout = () =>{
         setЭФ_WS_Clock(t)
         setЗагрузить(!Загрузить)
         setWS_Clock(data.WS_Clock)
-        console.log(data.WS_Clock.Стили)
+
+      }else if (КогоЗагрузить==0) {
+        var input = document.createElement('input')
+        input.type = 'file';
+        input.onchange = e => { 
+          var file = e.target.files[0]
+          var reader = new FileReader()
+          reader.readAsText(file,'UTF-8')
+          reader.onload = async readerEvent => {
+            var content = readerEvent.target.result
+            content = await JSON.parse(content)
+            document.getElementById("РазмерБуффера").value = content[0][0]
+            document.getElementById("КоличествоЭлементов").value = content[0][1]
+            document.getElementById("КоличествоСтраниц").value = content[0][2]
+            document.getElementById("РабочееМножество").value = content[0][3]
+            document.getElementById("СбросОбращения").value = content[0][4]
+            document.getElementById("ВЗД").value = content[0][5]
+            form.РазмерБуффера = content[0][0]
+            form.КоличествоЭлементов = content[0][1]
+            form.КоличествоСтраниц = content[0][2]
+            form.РабочееМножество = content[0][3]
+            form.СбросОбращения = content[0][4]
+            form.ВЗД = content[0][5]
+            form.Содержимое = []
+            for (let i = 0; i < content[1].length; i++) {
+              let Обращение = {}
+              Обращение.НомерСтраницы = content[1][i][0]
+              Обращение.ВремяОбращения = content[1][i][1]
+              Обращение.Запись = content[1][i][2]
+              form.Содержимое.push(Обращение)
+            }
+            Пичать(form)
+            setФайлПрочитан(1)
+          }
+       }
+        input.click()
       }
     } catch (e) {console.log(e)}
   }
 
   const Сгенерировать = async () => {
     try{
-      form.Содержимое = await request("/api/start/Gen", "POST", {...form})
-      form.Содержимое = form.Содержимое.Содержимое
-      const data = await request("/api/start/Add", "POST", {...form})
-      if (window.M && data.message) {
-        window.M.toast({html: data.message})
-      }
-      setКнопка(2)
-      setЗагрузить(!Загрузить)
-      data.fifo = await JSON.parse(data.fifo)
-      data.WS_Clock = await JSON.parse(data.WS_Clock)
-      Пичать(form)
-      setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
-      setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
-      clacc(data.WS_Clock.Стили,data.WS_Clock.Pf.length,data.WS_Clock.Буффер.length*4+3)
-      setfifo(data.fifo)
-      setWS_Clock(data.WS_Clock)
-      t=0
-      for (let i = 0; i < data.fifo.Pf.length; i++) {
-        t+=data.fifo.Pf[i]
-      }
-      setЭФ_fifo(t)
-      t=0
-      for (let i = 0; i < data.WS_Clock.Pf.length; i++) {
-        if(data.WS_Clock.Pf[i]!=-1)
-          t+=data.WS_Clock.Pf[i]
-      }
-      setЭФ_WS_Clock(t)
-    } catch (e) {console.log(e)}
+      if(!Проверка()){
+        if(!ФайлПрочитан){
+          form.Содержимое = await request("/api/start/Gen", "POST", {...form})
+          form.Содержимое = form.Содержимое.Содержимое
+        }
+        const data = await request("/api/start/Add", "POST", {...form})
+        if (window.M && data.message) {
+          window.M.toast({html: data.message})
+        }
+        setКнопка(2)
+        setЗагрузить(!Загрузить)
+        data.fifo = await JSON.parse(data.fifo)
+        data.WS_Clock = await JSON.parse(data.WS_Clock)
+        Пичать(form)
+        setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
+        setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
+        clacc(data.WS_Clock.Стили,data.WS_Clock.Pf.length,data.WS_Clock.Буффер.length*4+3)
+        setfifo(data.fifo)
+        setWS_Clock(data.WS_Clock)
+        t=0
+        for (let i = 0; i < data.fifo.Pf.length; i++) {
+          t+=data.fifo.Pf[i]
+        }
+        setЭФ_fifo(t)
+        t=0
+        for (let i = 0; i < data.WS_Clock.Pf.length; i++) {
+          if(data.WS_Clock.Pf[i]!=-1)
+            t+=data.WS_Clock.Pf[i]
+        }
+        setЭФ_WS_Clock(t)
+        setОтУд("Удалить")
+      } else(setText(Проверка()))
+    }catch (e) {console.log(e)}
   }
 
   const УдалениеДанных = async () => {
@@ -229,6 +294,8 @@ export const Rout = () =>{
         setЭФ_WS_Clock(0)
         if (data.message)
           setText(data.message)
+      } else if(КогоЗагрузить==0) {
+        Сгенерировать()
       }
     } catch (e) {}
   }
@@ -389,7 +456,7 @@ export const Rout = () =>{
                           style={{}}
                           onClick = {УдалениеДанных}
                           disabled = {!((КогоЗагрузить != -1 * ФайлПрочитан) * !loading)}
-                          >Удалить</button>
+                          >{ОтУд}</button>
                       </div>
                   </div>
                 </div>
