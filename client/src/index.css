@@ -92,9 +92,7 @@ h2, h4 {
     height: 30px;
     width: 50px
 }
-.ing2{
-    background-image: url("./unnamed.jpg");
-}
+
 .tabl {
     max-height: 500px;
     border:2px solid rgba(0, 0, 0, 1);

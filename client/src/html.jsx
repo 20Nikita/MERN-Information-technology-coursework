@@ -182,7 +182,7 @@ export const Rout = () => {
     }
     const ЗагрузитьДанные = async () => {
         try {
-            if (СохранДанные[КогоЗагрузить - 1]) {
+            if (КогоЗагрузить > 0) {
                 const data = await request("/api/start/getOne", "POST", СохранДанные[КогоЗагрузить - 1])
                 if (window.M && data.message) {
                     window.M.toast({html: data.message})
@@ -256,11 +256,12 @@ export const Rout = () => {
             console.log(e)
         }
     }
-
+    useEffect(()=>{console.log(Кнопка,КогоЗагрузить,(!!СохранДанные[КогоЗагрузить - 1]))},[Кнопка])
     const Сгенерировать = async () => {
         try {
             if (!Проверка()) {
-                if (Кнопка !== 5) {
+                if (КогоЗагрузить > 0) {
+                    console.log(Кнопка)
                     form.Содержимое = await request("/api/start/Gen", "POST", {...form})
                     form.Содержимое = form.Содержимое.Содержимое
                 }
@@ -268,7 +269,6 @@ export const Rout = () => {
                 if (window.M && data.message) {
                     window.M.toast({html: data.message})
                 }
-                setКнопка(2)
                 setЗагрузить(!Загрузить)
                 data.fifo = await JSON.parse(data.fifo)
                 data.WS_Clock = await JSON.parse(data.WS_Clock)
@@ -290,6 +290,7 @@ export const Rout = () => {
                 }
                 setЭФ_WS_Clock(t)
                 setОтУд("Удалить")
+                setКнопка(2)
             } else (setText(Проверка()))
         } catch (e) {
             console.log(e)
@@ -298,7 +299,7 @@ export const Rout = () => {
 
     const УдалениеДанных = async () => {
         try {
-            if (СохранДанные[КогоЗагрузить - 1]) {
+            if (КогоЗагрузить > 0) {
                 const data = await request("/api/start/Delete", "delete", СохранДанные[КогоЗагрузить - 1])
                 if (window.M && data.message) {
                     window.M.toast({html: data.message})
@@ -317,8 +318,8 @@ export const Rout = () => {
                 if (data.message)
                     setText(data.message)
             } else if (КогоЗагрузить === "0") {
-                Сгенерировать()
                 setКнопка(4)
+                Сгенерировать()
             }
         } catch (e) {
         }
