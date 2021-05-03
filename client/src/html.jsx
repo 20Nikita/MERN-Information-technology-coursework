@@ -4,8 +4,6 @@ import cn from "classnames";
 import { useHttp } from './hooks/http.hooks';
 import materialize from "materialize-css";
 
-
-
 export const Rout = () =>{
   let [text, setText] = useState("")
   let [fifo, setfifo] = useState({Буффер: [],НомерСтраницы:[],Pf: []})
@@ -86,11 +84,11 @@ export const Rout = () =>{
   }
   let [СохранДанные, setСохранДанные] = useState([])
   useEffect( () => {
-    var elems = document.querySelector('select');
+    let elems = document.querySelector('select');
     elems.length = 2
     materialize.FormSelect.init(elems, materialize.options);
     for (let index = 0; index < СохранДанные.length; index++) {
-      var elems = document.querySelector('select');
+      let elems = document.querySelector('select');
       elems.add(new Option(`${СохранДанные[index].Название}`,`${index+1}`))
       materialize.FormSelect.init(elems, materialize.options);
     }
@@ -325,7 +323,7 @@ export const Rout = () =>{
                           <div className="item">
                             <div className="btn zag4 notBor t">
                             <select onChange={ОбновитьSelect} className="materialSelect" id="myDropdown">
-                                <option value="-1" disabled selected name="Название">ОТКУДА?</option>
+                                <option value="-1" disabled defaultValue="Откуда?" name="Название">ОТКУДА?</option>
                                 <optgroup label="Из файла">
                                   <option value="0">Из файла</option>
                                 </optgroup>
