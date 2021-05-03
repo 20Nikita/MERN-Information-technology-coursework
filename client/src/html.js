@@ -3,7 +3,6 @@ import React, {useEffect, useState} from 'react';
 import cn from "classnames";
 import { useHttp } from './hooks/http.hooks';
 import materialize from "materialize-css";
-import BannerBgImg1 from "./unnamed.jpg";
 
 
 
@@ -95,15 +94,15 @@ export const Rout = () =>{
       elems.add(new Option(`${СохранДанные[index].Название}`,`${index+1}`))
       materialize.FormSelect.init(elems, materialize.options);
     }
-    if(Кнопка==0)
+    if(Кнопка===0)
     elems.value = -1
-    if(Кнопка==1)
+    if(Кнопка===1)
     elems.value = КогоЗагрузить
-    if(Кнопка==2){
+    if(Кнопка===2){
       elems.value = СохранДанные.length
       setКогоЗагрузить(СохранДанные.length)
       }
-    if(Кнопка==3){
+    if(Кнопка===3){
       setКогоЗагрузить(-1)
       elems.value = -1
     }
@@ -125,7 +124,7 @@ export const Rout = () =>{
   }
 
   
-  const Пичать = (data) =>{
+  const Печать = (data) =>{
     t = ""
     t += "Название: "
     t += data.Название
@@ -181,7 +180,7 @@ export const Rout = () =>{
         data.fifo = await JSON.parse(data.fifo)
         data.WS_Clock = await JSON.parse(data.WS_Clock)
         setКнопка(1)
-        Пичать(data.source)
+        Печать(data.source)
         setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
         setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: [], Стили: []})
         clacc(data.WS_Clock.Стили,data.WS_Clock.Pf.length - 1,data.WS_Clock.Буффер.length*4+3)
@@ -193,14 +192,14 @@ export const Rout = () =>{
         setЭФ_fifo(t)
         t=0
         for (let i = 0; i < data.WS_Clock.Pf.length; i++) {
-          if(data.WS_Clock.Pf[i]!=-1)
+          if(data.WS_Clock.Pf[i] !== -1)
             t+=data.WS_Clock.Pf[i]
         }
         setЭФ_WS_Clock(t)
         setЗагрузить(!Загрузить)
         setWS_Clock(data.WS_Clock)
 
-      }else if (КогоЗагрузить==0) {
+      }else if (КогоЗагрузить == 0) {
         var input = document.createElement('input')
         input.type = 'file';
         input.onchange = e => { 
@@ -230,7 +229,7 @@ export const Rout = () =>{
               Обращение.Запись = content[1][i][2]
               form.Содержимое.push(Обращение)
             }
-            Пичать(form)
+            Печать(form)
             setФайлПрочитан(1)
           }
        }
@@ -254,7 +253,7 @@ export const Rout = () =>{
         setЗагрузить(!Загрузить)
         data.fifo = await JSON.parse(data.fifo)
         data.WS_Clock = await JSON.parse(data.WS_Clock)
-        Пичать(form)
+        Печать(form)
         setfifo({Буффер: [],НомерСтраницы:[],Pf: []})
         setWS_Clock({ИзмененноеВремяОбращения: [], ВремяОбращения: [], НомерСтраницы: [], Буффер:[], Pf: []})
         clacc(data.WS_Clock.Стили,data.WS_Clock.Pf.length,data.WS_Clock.Буффер.length*4+3)
@@ -267,7 +266,7 @@ export const Rout = () =>{
         setЭФ_fifo(t)
         t=0
         for (let i = 0; i < data.WS_Clock.Pf.length; i++) {
-          if(data.WS_Clock.Pf[i]!=-1)
+          if(data.WS_Clock.Pf[i] !== -1)
             t+=data.WS_Clock.Pf[i]
         }
         setЭФ_WS_Clock(t)
@@ -294,7 +293,7 @@ export const Rout = () =>{
         setЭФ_WS_Clock(0)
         if (data.message)
           setText(data.message)
-      } else if(КогоЗагрузить==0) {
+      } else if(КогоЗагрузить === 0) {
         Сгенерировать()
       }
     } catch (e) {}
@@ -313,7 +312,7 @@ export const Rout = () =>{
     <div>
       <Route path = "/" exact>
         <div className = "vertical">
-          <div style={{height: 20}}></div>
+          <div style={{height: 20}}/>
           <div className = "item">
             <div className = "horizontal ">
               <div className = "item zag3 zag4">
@@ -321,29 +320,29 @@ export const Rout = () =>{
                   <div className="card blue-grey darken-1" style={{margin:0}}>
                     <div className="card-content white-text">
                       <span className="card-title cen zag1">Загрузить данные</span>
-                        <div style={{height: 5}}></div>
+                        <div style={{height: 5}}/>
                         <div className=" horizontal input-field">
                           <div className="item">
                             <div className="btn zag4 notBor t">
-                            <select onChange={ОбновитьSelect} class="materialSelect" id="myDropdown">
+                            <select onChange={ОбновитьSelect} className="materialSelect" id="myDropdown">
                                 <option value="-1" disabled selected name="Название">ОТКУДА?</option>
-                                <optgroup label="с файла">
-                                  <option value="0">С файла</option>
+                                <optgroup label="Из файла">
+                                  <option value="0">Из файла</option>
                                 </optgroup>
                                 <optgroup label="с сервера">
                                 </optgroup>
                               </select>
                             </div>
                           </div>
-                          <div style={{width: 10}}></div>
+                          <div style={{width: 10}}/>
                             <button className="waves-effect waves-light btn item zag4" 
                             onClick = {ЗагрузитьДанные}
-                            disabled = {!((КогоЗагрузить != -1) * !loading)}
+                            disabled = {!((КогоЗагрузить !== -1) * !loading)}
                             >Загрузить</button>
                       </div>
-                      <div style={{height: 30}}></div>
+                      <div style={{height: 30}}/>
                       <span className="card-title cen zag2">Сгенерировать новые</span>
-                      <div style={{height: 5}}></div>
+                      <div style={{height: 5}}/>
                       <div>
                         <div className="input-field">
                           <div className = "horizontal">
@@ -358,10 +357,9 @@ export const Rout = () =>{
                             type="text" 
                             className="validate cen" 
                             onChange={ОбновитьФорму}/>
-                          <div style={{width: 20}}></div>
-                          <button className="waves-effect waves-light btn zag4 ing"
-                          onClick = {ClearForm}></button>
-                      
+                            <div style={{width: 20}}/>
+                            <button className="waves-effect waves-light btn zag4 ing"
+                            onClick = {ClearForm}/>
                           </div>
 
                           <div className = "horizontal">
@@ -451,11 +449,11 @@ export const Rout = () =>{
                           onClick = {Сгенерировать}
                           disabled = {loading}
                           >Сгенерировать</button>
-                          <div style={{width: 10}}></div>
+                          <div style={{width: 10}}/>
                           <button className="waves-effect waves-light btn item zag4" 
                           style={{}}
                           onClick = {УдалениеДанных}
-                          disabled = {!((КогоЗагрузить != -1 * ФайлПрочитан) * !loading)}
+                          disabled = {!((КогоЗагрузить !== -1 * ФайлПрочитан) * !loading)}
                           >{ОтУд}</button>
                       </div>
                   </div>
@@ -487,7 +485,7 @@ export const Rout = () =>{
                         <tr>
                           <td>{НомерСтраницы}</td>
                           {fifo.Буффер.map((Буффер) => (
-                              <td>{ Буффер[index+1] !=-1 ? Буффер[index+1] : "."} </td> ))}
+                              <td>{ Буффер[index+1] !== -1 ? Буффер[index+1] : "."} </td> ))}
 
                           <td>{fifo.Pf[index]}</td>
                         </tr>))}
@@ -517,37 +515,37 @@ export const Rout = () =>{
                       <tbody>
                       {WS_Clock.НомерСтраницы.map((НомерСтраницы, index) => (
                         <tr>
-                          <td>{WS_Clock.ИзмененноеВремяОбращения[index] !=-1 ? WS_Clock.ИзмененноеВремяОбращения[index] : "."}</td>
+                          <td>{WS_Clock.ИзмененноеВремяОбращения[index] !== -1 ? WS_Clock.ИзмененноеВремяОбращения[index] : "."}</td>
                           <td className = {cn({
                             ["green"]: Clacc[index][1] === 3
-                          })}>{WS_Clock.ВремяОбращения[index] !=-1 ? WS_Clock.ВремяОбращения[index] : "."}</td>
+                          })}>{WS_Clock.ВремяОбращения[index] !== -1 ? WS_Clock.ВремяОбращения[index] : "."}</td>
                           
                           <td className = {cn({
                             ["yellow"]: Clacc[index][2] === 2,
-                        })}>{НомерСтраницы !=-1 ? НомерСтраницы : "."}</td>
+                        })}>{НомерСтраницы !== -1 ? НомерСтраницы : "."}</td>
                           
                           {WS_Clock.Буффер.map((Буффер,y) => (
                             <td style={{padding:0,border:0}}>
                               <td className = {cn({
                                 ["red jir"]: Clacc[index][y*4+3] === 1,
                                 ["jir"]: Clacc[index][y*4+3] !== 1, 
-                                })}>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.ТекущаяСтраница[index] : "."} </td>
-                              <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.БитОбращения[index] : "."} </td>
+                                })}>{ Буффер.ТекущаяСтраница[index] !== -1 ? Буффер.ТекущаяСтраница[index] : "."} </td>
+                              <td>{ Буффер.ТекущаяСтраница[index] !== -1 ? Буффер.БитОбращения[index] : "."} </td>
                               <td className = {cn({
                                 ["green"]: Clacc[index][y*4+5] === 3, 
-                                })}>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.БитИзменения[index] : "."} </td>
-                              <td>{ Буффер.ТекущаяСтраница[index] !=-1 ? Буффер.ВремяПоследнегоИзменения[index] : "."} </td>
+                                })}>{ Буффер.ТекущаяСтраница[index] !== -1 ? Буффер.БитИзменения[index] : "."} </td>
+                              <td>{ Буффер.ТекущаяСтраница[index] !== -1 ? Буффер.ВремяПоследнегоИзменения[index] : "."} </td>
                               </td>))}
 
-                      <td className="">{WS_Clock.Pf[index] !=-1 ? WS_Clock.Pf[index] : "."}</td>
+                      <td className="">{WS_Clock.Pf[index] !== -1 ? WS_Clock.Pf[index] : "."}</td>
                     </tr>))}
                   </tbody>
                 </table>
               </div>
               <h4>NPF = {ЭФ_WS_Clock}</h4>
-            <div style={{width: 20}}></div>
+            <div style={{width: 20}}/>
             </div>
-            <div style={{height: 50}}></div>
+            <div style={{height: 50}}/>
           </div>
         </Route>
       <Redirect to ="/"/>

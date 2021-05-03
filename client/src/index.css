@@ -61,7 +61,7 @@ h2, h4 {
     height: 45px;
 }
 .notBor input{
-    border-bottom: 0px!important;
+    border-bottom: 0!important;
     color: #fff;
     padding: 0;
     margin-left: auto!important;
@@ -94,7 +94,6 @@ h2, h4 {
 }
 .ing2{
     background-image: url("./unnamed.jpg");
-    background-image: "url(./unnamed.jpg)"
 }
 .tabl {
     max-height: 500px;
@@ -120,7 +119,7 @@ h2, h4 {
 table.responsive-table1{width:100%;display:block;position:relative}
 table.responsive-table1 td:empty:before{content:'\00a0'}
 table.responsive-table1 th,table.responsive-table td{margin:0;vertical-align:top}
-table.responsive-table1 th{text-align:left; padding:0px; color: rgb(255, 255, 255);}
+table.responsive-table1 th{text-align:left; padding:0; color: rgb(255, 255, 255);}
 table.responsive-table1 thead{display:block;float:left ;}
 table.responsive-table1 thead tr{display:block;}
 table.responsive-table1 thead tr th::before{content:"\00a0"}
