@@ -216,7 +216,7 @@ export const Rout = () => {
                 setЗагрузить(!Загрузить)
                 setWS_Clock(data.WS_Clock)
 
-            } else if (КогоЗагрузить == 0) {
+            } else if (КогоЗагрузить === "0") {
                 var input = document.createElement('input')
                 input.type = 'file';
                 input.onchange = e => {
@@ -316,7 +316,7 @@ export const Rout = () => {
                 setЭФ_WS_Clock(0)
                 if (data.message)
                     setText(data.message)
-            } else if (КогоЗагрузить == 0) {
+            } else if (КогоЗагрузить === "0") {
                 Сгенерировать()
                 setКнопка(4)
             }
@@ -482,7 +482,7 @@ export const Rout = () => {
                                             <button className="waves-effect waves-light btn item zag4"
                                                     style={{}}
                                                     onClick={УдалениеДанных}
-                                                    disabled={!(((КогоЗагрузить > 0) + (КогоЗагрузить == 0) * ФайлПрочитан) * !loading)}
+                                                    disabled={!(((КогоЗагрузить > 0) + (КогоЗагрузить === "0") * ФайлПрочитан) * !loading)}
                                             >{ОтУд}</button>
                                         </div>
                                     </div>
