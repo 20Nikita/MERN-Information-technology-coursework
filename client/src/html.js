@@ -242,7 +242,7 @@ export const Rout = () =>{
   const Сгенерировать = async () => {
     try{
       if(!Проверка()){
-        if(!ФайлПрочитан){
+        if(Кнопка !== 5){
           form.Содержимое = await request("/api/start/Gen", "POST", {...form})
           form.Содержимое = form.Содержимое.Содержимое
         }
@@ -296,6 +296,7 @@ export const Rout = () =>{
           setText(data.message)
       } else if(КогоЗагрузить==0) {
         Сгенерировать()
+        setКнопка(4)
       }
     } catch (e) {}
   }
@@ -327,8 +328,8 @@ export const Rout = () =>{
                             <div className="btn zag4 notBor t">
                             <select onChange={ОбновитьSelect} class="materialSelect" id="myDropdown">
                                 <option value="-1" disabled selected name="Название">ОТКУДА?</option>
-                                <optgroup label="с файла">
-                                  <option value="0">С файла</option>
+                                <optgroup label="из файла">
+                                  <option value="0">из файла</option>
                                 </optgroup>
                                 <optgroup label="с сервера">
                                 </optgroup>
@@ -367,7 +368,7 @@ export const Rout = () =>{
                           <div className = "horizontal">
                             <p className = "cen"
                             style={{width: 350}}
-                            >Размер буффера</p>
+                            >Размер буфера</p>
 
                             <input placeholder=" > 0" 
                             id="РазмерБуффера" 
@@ -421,7 +422,7 @@ export const Rout = () =>{
                               style={{width: 350}}
                               >Время сброса обращения</p>
 
-                              <input placeholder=" > 2 " 
+                              <input placeholder=" > 1 " 
                               id="СбросОбращения" 
                               name="СбросОбращения" 
                               type="Number" 
@@ -455,7 +456,7 @@ export const Rout = () =>{
                           <button className="waves-effect waves-light btn item zag4" 
                           style={{}}
                           onClick = {УдалениеДанных}
-                          disabled = {!((КогоЗагрузить != -1 * ФайлПрочитан) * !loading)}
+                          disabled = {!(((КогоЗагрузить > 0)+(КогоЗагрузить == 0)*ФайлПрочитан) * !loading)}
                           >{ОтУд}</button>
                       </div>
                   </div>
