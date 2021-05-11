@@ -260,8 +260,7 @@ export const Rout = () => {
     const Сгенерировать = async () => {
         try {
             if (!Проверка()) {
-                if (КогоЗагрузить > 0) {
-                    console.log(Кнопка)
+                if (КогоЗагрузить !== "0") {
                     form.Содержимое = await request("/api/start/Gen", "POST", {...form})
                     form.Содержимое = form.Содержимое.Содержимое
                 }
